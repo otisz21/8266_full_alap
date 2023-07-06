@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>NTP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>  
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">  
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'/>  
+</head>
+
+<body>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+<p>
+  <button onclick="window.location.href='setup.html'"; class='SetupButton' 
+   style='background:#E8DAEF;'>INFO<br>& setup</button>
+
+  <button onclick="window.location.href='wifi.html'" class='SetupButton'
+   style='background:#FFFFC3;'>WIFI<br>setup</button>
+   
+ <button onclick="window.location.href='index.html'" class='SetupButton'
+  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+</p>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+<p>   
+  <button onclick="window.location.href='ntp.html'" class='SetupButton' 
+   style='background:#82E0AA;'>NTP<br>setup</button>
+
+  <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
+   style='background:lightblue;'>DDNS<br>setup</button>
+
+  <button onclick="window.location.href='proc.html'"; class='SetupButton' 
+   style='background:#ff9797;'>PROC.<br>MEMORY</button>       
+</p> 
+  
+  
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
+
+<p style="background-color:#82E0AA; text-align:left; margin-left:10px;">
+   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
+    color:blue; vertical-align: middle;"
+    onclick="window.location.href='schem.html'"></i></button>
+    <strong> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp NTP (AUTOMATA)</strong>
+</p> 
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">   
+
+<h2 style="font-size:14px;">(Fix értékek, csak az .ino fájlban modosíthatóak.)</h2> 
+
+<h2>Automatikus, időzóna: HU/Budapest</h2> 
+
+<h2>Frissítés 4 óránként.</h2> 
+
+<h2 style="padding-top:2px; font-weight: normal;"><u>NTP szerver-1:</u></h2>
+<h2> <span id='NTP_SZ_1'>0.europe.pool.ntp.org</span></h2>
+
+<h2 style="padding-top:8px; font-weight: normal;"><u>NTP szerver-2:</u></h2>
+<h2> <span id='NTP_SZ_1'>time.nist.gov</span></h2>
+
+<h2 style="padding-top:8px; font-weight: normal;"><u>Időzóna kód (TZ-sting):</u></h2>
+<h2> <span id='TZ_ST'>CET-1CEST,M3.4.0/2,M10.5.0/3</span></h2>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+
+<h2 style="font-weight: normal;"><u>Utolsó NTP frissítés:</u></h2>
+<h2> <span id='NTP_U'>xxxx. xx. xx. - xx:xx:xx</span></h2>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+
+<div onclick="sync();" style="cursor:pointer;">
+<p style=" font-size:22px; font-weight: bold; color:darkblue; ">
+   <i class="fa fa-sync" style="font-size:16px; margin-top:8px; 
+      color:blue;"></i>&nbsp&nbsp&nbsp
+      <span id="TIME" >XX:XX</span>&nbsp&nbsp&nbsp
+      <i class="fa fa-sync" style="font-size:16px; margin-top:8px; 
+      cursor:pointer; color:blue;"></i>
+</p>
+
+<p style=" font-size:16px; font-weight: bold; color:darkblue; ">
+   <span id="DATE" >XXXX. xx. xx.</span>&nbsp - &nbsp <span id="DOW" >yyyyyyyy</span>
+</p>
+
+<p style=" font-size:15px; font-weight: bold; color:darkblue; ">Az év 
+   <span id="Y_X_DAY" >XXX</span>. napja van.
+</p>
+
+<p style=" font-size:15px; font-weight: bold; color:darkblue; ">Jelenleg 
+   <span id="ISDT" > xyxyxy </span> időszámítás van.
+</p>
+
+<p style=" font-size:15px; font-weight: bold; color:darkblue; ">Aktuális EPOCH time:   
+   <span id="EPO_MOST" > xxxxxxxxxx </span>
+</p>
+</div>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+
+<h3> >>> OTT <<< </h3>
+
+<script src="ntp.js"></script>
+
+</body>
+</html>

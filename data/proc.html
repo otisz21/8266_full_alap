@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>EEPROM</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">  
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'>
+</head>
+
+<body>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+<p>
+  <button onclick="window.location.href='setup.html'"; class='SetupButton' 
+   style='background:#E8DAEF;'>INFO<br>& setup</button>
+
+  <button onclick="window.location.href='wifi.html'" class='SetupButton'
+   style='background:#FFFFC3;'>WIFI<br>setup</button>
+   
+ <button onclick="window.location.href='index.html'" class='SetupButton'
+  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+</p>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+<p>   
+  <button onclick="window.location.href='ntp.html'" class='SetupButton' 
+   style='background:#82E0AA;'>NTP<br>setup</button>
+
+  <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
+   style='background:lightblue;'>DDNS<br>setup</button>
+
+  <button onclick="window.location.href='proc.html'"; class='SetupButton' 
+   style='background:#ff9797;'>PROC.<br>MEMORY</button>       
+</p>      
+
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
+
+<p style="background-color:#ff9797; text-align:left; margin-left:10px;">
+   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
+    color:blue; vertical-align: middle;"
+    onclick="window.location.href='schem.html'">
+    </i></button>
+    &nbsp&nbsp&nbsp&nbsp<strong>Processor és Memória</strong></p>
+    
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:4px;">
+
+<h4><u>Processor info:</u></h4>      
+
+  <div class="hyp">&nbsp
+    <div class="first">Proc. Vcc :</div>
+    <div class="second"><span id='PROC_0'>PROC_0</span> V</div>
+  </div>
+  
+  <div class="hyp">&nbsp
+    <div class="first">Chip Id :</div>
+    <div class="second"><span id='PROC_1'>PROC_1</span></div>
+  </div>
+ 
+  <div class="hyp">&nbsp
+    <div class="first">Core version :</div>
+    <div class="second"><span id='PROC_2'>PROC_2</span></div>
+  </div>
+
+  <div class="hyp">&nbsp
+    <div class="first">Sdk version:</div>
+    <div class="second"><span id='PROC_3'>PROC_3</span></div>
+  </div>
+
+  <div class="hyp">&nbsp
+    <div class="first">Cpu Freq:</div>
+    <div class="second"><span id='PROC_4'>PROC_4</span> MHz</div>
+  </div>
+
+  <div class="hyp">&nbsp
+    <div class="first">Sketch size :</div>
+    <div class="second"><span id='PROC_5'>PROC_5</span> byte</div>
+  </div>
+
+  <div class="hyp">&nbsp
+    <div class="first">Free Sketch Space :</div>
+    <div class="second"><span id='PROC_6'>PROC_6</span> byte</div>
+  </div>
+  <hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:50%;"> 
+
+
+  <div class="hyp">&nbsp
+    <div class="first">FlashChip Id :</div>
+    <div class="second"><span id='PROC_7'>PROC_7</span></div>
+  </div>
+
+  <div class="hyp">&nbsp
+    <div class="first">FlashChip size :</div>
+    <div class="second"><span id='PROC_8'>PROC_8</span> byte</div>
+  </div>
+  
+  
+  <div class="hyp">&nbsp
+    <div class="first">FlashChip Freq :</div>
+    <div class="second"><span id='PROC_9'>PROC_9</span> MHz</div>
+  </div>      
+  <hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:50%;"> 
+
+  <div class="hyp">&nbsp
+    <div class="first">FreeHeap:</div>
+    <div class="second"><span id='PROC_10'>PROC_10</span> byte</div>
+  </div> 
+
+  <div class="hyp">&nbsp
+    <div class="first">Max.free block size:</div>
+    <div class="second"><span id='PROC_11'>PROC_11</span> byte</div>
+  </div> 
+
+  <div class="hyp">&nbsp
+    <div class="first">Heap fragment.:</div>
+    <div class="second"><span id='PROC_12'>PROC_12</span> %</div>
+  </div> 
+  <hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:50%;">
+
+  <div class="hyp">&nbsp
+    <div class="first">Proc. újraindult :</div>
+    <div class="second"><span id='PROC_13'>PROC_13</span> -x</div>
+  </div> 
+
+<h4 style="font-weight:normal; margin-bottom:2px; font-size: 1.1rem"><u>Előző reset oka:</u></h4>
+<h4 style="font-weight:bold; margin-top:2px; font-size: 1.1rem"><span id='PROC_14'>PROC_14</span></h4>
+ 
+<hr style="height:1px; background-color:black; margin-top:10px; margin-bottom:6px; width:80%;"> 
+
+<h4><u>Little FS filesystem info:</u></h4>      
+
+<div class="hyp">&nbsp
+  <div class="first">Filesystem type :</div>
+  <div class="second"><span id='PROC_15'>PROC_15</span></div>
+</div>
+
+<div class="hyp">&nbsp
+  <div class="first">Total space :</div>
+  <div class="second"><span id='PROC_16'>PROC_16</span> byte</div>
+</div>
+
+<div class="hyp">&nbsp
+  <div class="first">Total space used :</div>
+  <div class="second"><span id='PROC_17'>PROC_17</span> byte</div>
+</div>
+
+<div class="hyp">&nbsp
+  <div class="first">FS használatban :</div>
+  <div class="second"><span id='PROC_18'>PROC_18</span> %</div>
+</div>
+     
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:6px;">  
+
+
+<p style="text-align:right; margin-right:5px;">
+     <i  class="fa fa-cog fa-spin fa-3x fa-fw" 
+     style=" font-size:30px; vertical-align:middle; margin-bottom: 8px;" id="BUSY_1"></i>
+    <button class="myB_eeprom" id="EE_CLEAR"
+     onclick="EE_CLEAR ();"><i class="fas fa-exclamation-triangle" 
+     style="color:yellow; font-size:25px;"></i>&nbsp&nbsp<span 
+     id="EE_C_TEXT">EEPROM CLEAR !!!</span></button>
+</p> 
+
+<hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px;">
+
+<h4>- teljes futásidő számláló -<br>
+    Percenként 1-el növekszik,<br>3 byte (240, 241, 242-es címen).<br>
+    Naponta kétszer, vagy web-es újraíndításkor menti az EEPROM-ba.</h4>
+
+<p style="text-align:right; margin-right:5px; margin-top:1px; margin-bottom:1px;">
+    <label class="label_1" >Év:</label>
+    <input type="number" class="select_text_EE" id="RUN_YEAR" 
+    min="0" max="31" step="1"
+    oninput="valtozas_1 ();" />&nbsp&nbsp
+    <label class="label_1" >nap:</label>
+    <input type="number" class="select_text_EE" id="RUN_DAY" 
+    min="0" max="365" step="1"
+    oninput="valtozas_1 ();" />&nbsp&nbsp
+    <label class="label_1" >óra:</label>
+    <input type="number" class="select_text_EE" id="RUN_HOUR" 
+    min="0" max="23" step="1"
+    oninput="valtozas_1 ();" />     
+</p>  
+<p style="text-align:right; margin-right:5px;">
+    <label class="label_1" >allrun_perc_int:</label>
+    <input type="number" class="select_text_EE" id="RUN_ALL" 
+    style="width:180px;" min="0" max="16777215" step="1"     
+    oninput="valtozas_2 ();" />    
+</p> 
+
+<p style="text-align:right; margin-right:5px;">
+    <button class="myB_eeprom" id="RUN_OWER_BUTTON"
+     onclick="RUN_write ();"><i class="fas fa-exclamation-triangle" 
+     style="color:yellow; font-size:25px;"></i>&nbsp&nbsp FELÜLÍRÁS !!!</button>
+</p> 
+
+<hr style="height:1px; background-color:black">
+<h3> >>> OTT <<< </h3>
+
+</body>
+ 
+<script src="proc.js"></script> 
+
+</html>

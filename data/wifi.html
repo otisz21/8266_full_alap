@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>WIFI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>  
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">  
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'/>  
+</head>
+
+<body>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+<p>
+  <button onclick="window.location.href='setup.html'"; class='SetupButton' 
+   style='background:#E8DAEF;'>INFO<br>& setup</button>
+
+  <button onclick="window.location.href='wifi.html'" class='SetupButton'
+   style='background:#FFFFC3;'>WIFI<br>setup</button>
+   
+ <button onclick="window.location.href='index.html'" class='SetupButton'
+  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+</p>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+<p>   
+  <button onclick="window.location.href='ntp.html'" class='SetupButton' 
+   style='background:#82E0AA;'>NTP<br>setup</button>
+
+  <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
+   style='background:lightblue;'>DDNS<br>setup</button>
+
+  <button onclick="window.location.href='proc.html'"; class='SetupButton' 
+   style='background:#ff9797;'>PROC.<br>MEMORY</button>       
+</p>      
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
+
+<p style="background-color:#FFFFC3; text-align:left; margin-left:10px;">
+   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
+    color:blue; vertical-align: middle;"   
+    onclick="window.location.href ='schem.html'">
+    </i></button>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<strong>WIFI INFO & SETUP</strong></p>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">      
+
+      <div class="hyp">&nbsp
+        <div class="first">WIFI connect mode :</div>
+        <div class="second"><span id='J_wifi_mode'>Cient vs. AP</span></div>
+      </div>
+     
+      <div class="hyp">&nbsp
+        <div class="first">WIFI SSID :</div>
+        <div class="second"><span id='J_ssid'></span></div>
+      </div>
+      
+      <div class="hyp">&nbsp
+        <div class="first">Local IP :</div>
+        <div class="second"><span id='J_ip'></span></div>
+      </div>
+
+      <div class="hyp">&nbsp
+        <div class="first">TCP/IP port:</div>
+        <div class="second"><span id='J_port'>xx</span></div>
+      </div>
+      
+      <div class="hyp">&nbsp
+        <div class="first">WIFI RSSI :</div>
+        <div class="second"><span id='J_rssi'></span> dBm</div>
+      </div>
+
+      <div class="hyp">&nbsp
+        <div class="first">WIFI MAC :</div>
+        <div class="second"><span id='J_mac'></span></div>
+      </div>
+
+      <div class="hyp">&nbsp
+        <div class="first">Wi-Fi status :</div>
+        <div class="second"><span id='W_status'></span></div>
+      </div>  
+
+<hr style="height:1px; background-color:black; margin-top:10px; margin-bottom:10px;">   
+
+    <button class="myButton myB_wifi" style="width:90%; " 
+            onclick="W_RESET ();" >RESTART<br>!!!</button>                     
+  
+     <h3> >>> OTT <<< </h3>
+     
+<script src="wifi.js"></script>
+</body>
+</html>

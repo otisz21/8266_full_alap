@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>SETUP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>  
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">     
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'/>  
+</head>
+
+<body>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+<p>
+     <button onclick="window.location.href='setup.html'"; class='SetupButton' 
+      style='background:#E8DAEF;'>INFO<br>& setup</button>
+
+     <button onclick="window.location.href='wifi.html'" class='SetupButton'
+      style='background:#FFFFC3;'>WIFI<br>setup</button>
+      
+    <button onclick="window.location.href='index.html'" class='SetupButton'
+     style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+</p>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+  <p>   
+     <button onclick="window.location.href='ntp.html'" class='SetupButton' 
+      style='background:#82E0AA;'>NTP<br>setup</button>
+ 
+     <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
+      style='background:lightblue;'>DDNS<br>setup</button>
+
+     <button onclick="window.location.href='proc.html'"; class='SetupButton' 
+      style='background:#ff9797;'>PROC.<br>MEMORY</button>       
+  </p>      
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
+
+<p style="background-color:#E8DAEF; text-align:left; margin-left:10px;">
+   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
+    color:blue; vertical-align: middle;"
+    onclick="window.location.href ='schem.html'">
+    </i></button>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<strong>INFO & SETUP</strong></p>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">    
+
+    <div class="hyp">&nbsp
+     <div class="first"><u>Senzor type:</u></div>
+      <div class="second">
+      <span style="vertical-align:top;" id='SENZ_T'>BME-280 (I2C)</span>
+      </div>
+    </div> 
+
+    <div class="hyp">&nbsp
+     <div class="first"><u>Senzor:</u></div>
+      <div class="second">
+      <span style="vertical-align:top;" id='SENZ_OK'>RESULT</span>
+      </div>
+    </div> 
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
+
+    <h2 style="padding-top:2px; font-weight: normal;"><u>ESP PlatformIO project:</u></h2>
+    <h2> <span id='J_SV'>project name</span></h2>
+    
+    <h2 style="padding-top:8px; font-weight: normal;"><u>ESP szoftver fordítás időpontja:</u></h2>
+    <h2> <span id='J_ST'>comp. time</span></h2>
+
+    <h2 style="padding-top:8px; font-weight: normal;"><u>Processor modul type:</u></h2>
+    <h2> <span id='J_BOARD'>modul type</span></h2> 
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
+      
+    <h2 style="padding-top:4px; padding-bottom:30px; font-weight: normal;"><u>Futás idő:</u> <br>
+    <span style="font-size:20px; font-weight: bold;" id='J_SRUN'>10 év, 145 nap, 25 óra, 45 perc.</span></h2>
+ 
+    <h2 style="padding-top:2px; padding-bottom:30px; font-weight: normal;"><u>Teljes futás idő (SUM):</u> <br>
+    <span style="font-size:20px; font-weight: bold;" id='J_SRUN_ALL'>10 év, 145 nap, 25 óra, 45 perc.</span></h2>       
+   
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:4px;">  
+
+
+<p>
+    <button class="myB_eeprom" style="background-color: black; width:200px;"
+     onclick="window.location.href='/update'";><i class="fas fa-exclamation-triangle" 
+     style="color:yellow; font-size:20px;"></i>&nbsp&nbspSzoftver frissítés!</button>
+</p> 
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
+
+<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:1px;">
+    <label style="padding-bottom:-5px; padding-top:-5px;">Log fájlok készítése: <input 
+    type="checkbox" class="check_setup" id="MAKE_LOG"
+    onchange= "valtozas ()" /></label>         
+</h4>
+
+<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:-2px;">
+    <label style="padding-bottom:-5px; padding-top:-5px;">Serial (COM) vonalon 
+    információk: <input type="checkbox" class="check_setup" id="S_DEBUG"
+    onchange= "valtozas ()" /></label>         
+</h4> 
+
+<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:-2px;">
+    <label style="padding-bottom:-5px; padding-top:-5px;"
+    >Alaplapi kék LED (program futás): <input type="checkbox" 
+    class="check_setup" id="BLUE_LED" onchange= "valtozas ()" /></label>         
+</h4>
+
+<hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:80%">
+ 
+<button id="GOMB_SEND" class='myButton myB_start' 
+        style="width:60%;" onclick="save();" >SAVE</button>
+     
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;"> 
+<h3> >>> OTT <<< </h3>
+ 
+<p><b>Gombok, próbákhoz.</b></p>    
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_1" onclick="BUTTON (1);" >1.<br>WS send<br>num: 10</button>
+
+    <button class="button_P"
+     id="B_2" onclick="BUTTON (2);" >2.<br>WS send<br>String: "10"</button>
+</p>
+
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_3" onclick="BUTTON (3);" >3.<br>proc_restart:<br>1</button>
+
+    <button class="button_P"
+     id="B_4" onclick="BUTTON (4);" >4.<br>proc_restart:<br>10</button>
+</p>
+
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_5" onclick="BUTTON (5);" >5.<br>- - - -<br>- - - -</button>
+
+    <button class="button_P"
+     id="B_6" onclick="BUTTON (6);" >6.<br>- - - -<br>- - - -</button>
+</p>
+
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_7" onclick="BUTTON (7);" >7.<br>- - - -<br>- - - -</button>
+
+    <button class="button_P"
+     id="B_8" onclick="BUTTON (8);" >8.<br>- - - -<br>- - - -</button>
+</p>
+
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_9" onclick="BUTTON (9);" >9.<br>- - - -<br>- - - -</button>
+
+    <button class="button_P"
+     id="B_10" onclick="BUTTON (10);" >10.<br>ESP.restart()<br>!</button>
+</p>
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:10px;">             
+    
+<script src="setup.js"></script>
+</body>
+</html>  

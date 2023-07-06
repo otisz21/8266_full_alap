@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>DDNS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>  
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">   
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'/>  
+</head>
+
+<body>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+<p>
+  <button onclick="window.location.href='setup.html'"; class='SetupButton' 
+   style='background:#E8DAEF;'>INFO<br>& setup</button>
+
+  <button onclick="window.location.href='wifi.html'" class='SetupButton'
+   style='background:#FFFFC3;'>WIFI<br>setup</button>
+   
+ <button onclick="window.location.href='index.html'" class='SetupButton'
+  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+</p>
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+<p>   
+  <button onclick="window.location.href='ntp.html'" class='SetupButton' 
+   style='background:#82E0AA;'>NTP<br>setup</button>
+
+  <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
+   style='background:lightblue;'>DDNS<br>setup</button>
+
+  <button onclick="window.location.href='proc.html'"; class='SetupButton' 
+   style='background:#ff9797;'>PROC.<br>MEMORY</button>       
+</p>    
+<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
+
+<p style="background-color:lightblue; text-align:left; margin-left:10px;">
+   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
+    color:blue; vertical-align: middle;"
+    onclick="window.location.href = 'schem.html'">
+    </i></button>
+    &nbsp<strong>Dynamic Domain Name System</strong></p> 
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">   
+
+<label class="label_1" >Szolgáltató: noip.com &nbsp&nbsp BE-KI: 
+<input type="checkbox" class="check_alap"  id="DDNS_ONOFF" 
+       name="DDNS_onoff" onchange= "valtozas (), KI_BE()"
+       style="vertical-align: middle;" />
+</label>
+<p style="color:red; font-weight:bold;" ><span 
+    id="kikapcs">A szolgáltatás ki van kapcsolva! </span>
+</p>    
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">     
+
+<div id="osszes" > 
+<label class="label_3" >WAN IP check time & status: </label>
+<label class="label_1" ><span id="WAN_T">XXXX-xx-xx | xx:xx:xx</span>
+       &nbsp - &nbsp <span id="WAN_S">XXX</span></label>
+
+<p style="text-align:right; margin-right:14px; margin-top:-2px;"><label class="label_1" 
+   for="input1">Frissítési intervallum (sec.):</label>
+<input type="number" class="select_text" id="DDNS_UPDATE" 
+       style="width:80px;" name="DDNS_input" min="30" max="3600" step="1"
+       oninput="valtozas ();" /></p>  
+
+<button onclick="check_WAN_IP()" id="CHECK_WAN_IP" class="myButton_ddns"
+        >WAN IP check</button> 
+ 
+<hr style="height:1px; background-color:black; margin-top:10px; margin-bottom:10px;">   
+ 
+ <div class="hyp">&nbsp
+        <div class="first" style="font-weight:normal;">WAN old IP :</div>
+        <div class="second"><span id='WAN_IP_OLD'>255.255.255.255</span></div>
+      </div>
+      
+      <div class="hyp">&nbsp
+        <div class="first" style="font-weight:bold;">WAN new IP :</div>
+        <div class="second"><span id='WAN_IP_NEW'>255.255.255.255</span></div>
+      </div>    
+    
+<h2 style="padding-top:6px; font-weight: normal;">Utolsó frissítés ideje:</h2>
+<h2> <span style="font-size:22px" id='LAST_UDP'>XXXX. xx. xx., yy:yy:yy</span></h2>    
+
+<label class="label_2" >NO-IP válasz:</label>
+<textarea id="OUTPUT" style="width:200px; height:40px; margin-top:8px;" ></textarea>
+
+<button onclick="NO_IP_update()" id="NO_IP_UPDATE" class="myButton_ddns"
+        >No IP update !</button> 
+        
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:4px;"> 
+
+<label class="label_1" >&nbsp&nbsp Frissítendő gazdagépnév:</label>      
+      
+
+    <input type="text"  class="text_ddns" id="DDNS_DOMAIN" name="DDNS_input" 
+    maxlength="30" oninput="valtozas ();" value="" />
+
+<h4>Felhasználó név, jelszó, forrásfájlban megadva.</h4>     
+
+</div> 
+         
+<button onclick="DDNS_save()" id="DDNS_SAVE" class="myButton_log"
+        style="background-color:lightgray; margin-top:12px;
+        color: white; width:60%;">SAVE</button>          
+
+<hr style="height:1px; background-color:black; margin-top:12px; margin-bottom:2px;">     
+     <h3> >>> OTT <<< </h3> 
+  
+<script src="ddns.js"></script>
+</body>
+</html>

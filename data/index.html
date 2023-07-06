@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Hőmérő</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="Generator" content="Notepad++"/>
+  <meta name="Author" content="OTT Co."/>  
+  <meta charset="UTF-8"/>  
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" type="text/css" href="all_style.css">         
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' 
+  integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
+  crossorigin='anonymous'/>  
+
+</head>
+<body>
+ 
+<hr style="height:1px; background-color:black; margin-top:10px; margin-bottom:-2px;"> 
+
+<p id="cim_color" style="background-color:lightgreen; height:22px; cursor:pointer;" onclick="JSON_adatok();">
+   <strong><span id="cim_text" >CIM</span></strong>&nbsp&nbsp     
+</p> 
+
+<hr style="height:1px; background-color:black; margin-top:-2px; margin-bottom:2px;">
+
+<label class="label_T_D">
+   <i class="far fa-clock" style="padding-left:10px;"></i>
+   <strong><span id="TIME" style="padding-left:90px;" >XX:50:XX</span></strong>&nbsp&nbsp     
+</label>
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+
+<label class="label_T_D">
+   <i class="far fa-calendar-alt" style="padding-left:13px;"></i>
+   <strong>
+   <span id="DATE" style="padding-left:30px; font-size:20px;" >XXXX-01-XX</span>
+   <span id="DOW" style="padding-left:30px; font-size:20px;" >yyütörtyy</span>
+   </strong>    
+</label>
+
+<h4 id="ALARM_1" style="background-color:orange; text-align:left; margin-left:0px; 
+    margin-right:0px; cursor:pointer;" onclick="restart_clear();">
+<button  style="background-color:black;">
+   <i class="fas fa-exclamation-triangle"
+     style="font-size:16px; margin-top:2px; color:yellow;"></i></button>
+    &nbsp&nbsp&nbsp&nbsp<strong><span id="ALARM_TEXT_1" > ALARM-1</span></strong>
+</h4> 
+
+<div onclick="JSON_adatok()" 
+     style="cursor:pointer; background-color:#f5f5f0;" >
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:20px;">         
+
+   
+<i class="fa fa-sync" style="font-size:20px; margin-top:8px; 
+        cursor:pointer; color:blue;"> Refresh</i>
+
+<label class="label_min_max_cim" >ESP8266 alap konfig.<br>
+   <br>
+  - Webserver<br>
+  - FTP server<br>
+  - OTA<br>
+  - mDNS<br>
+  - sNTP idő<br>
+  - WiFi<br>
+  - LittleFS<br>
+  - Preference<br>
+  - egyéni könyvtár (led)<br>
+  - JSON<br>
+</label>
+</div>  
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+
+<p style="margin-top:10px;">
+    <button class="myButton" style="background-color:#ff9797; width:80%;" 
+     onclick="window.location.href ='setup.html'">SETUP <i 
+     class="fa fa-tools"></i></button>
+</p>
+<h3> >>> OTT <<< </h3> 
+<script src="index.js"></script>
+</body>
+</html>
