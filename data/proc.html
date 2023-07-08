@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>EEPROM</title>
+  <title>PROC</title>
   <meta name='viewport' content='width=device-width, initial-scale=1'/>
   <meta name="Generator" content="Notepad++"/>
   <meta name="Author" content="OTT Co."/>
@@ -12,41 +12,38 @@
   integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' 
   crossorigin='anonymous'>
 </head>
-
 <body>
-<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
+
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;"> 
 <p>
   <button onclick="window.location.href='setup.html'"; class='SetupButton' 
-   style='background:#E8DAEF;'>INFO<br>& setup</button>
-
+   style='background:#dddcdc;'>INFO<br>& setup</button>
   <button onclick="window.location.href='wifi.html'" class='SetupButton'
-   style='background:#FFFFC3;'>WIFI<br>setup</button>
-   
+   style='background:#dddcdc;'>WIFI<br>setup</button>
  <button onclick="window.location.href='index.html'" class='SetupButton'
-  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
+  style='background:lightgreen'><i class="fa fa-home" ></i><br>HOME</button>    
 </p>
-<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
+<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
 <p>   
   <button onclick="window.location.href='ntp.html'" class='SetupButton' 
-   style='background:#82E0AA;'>NTP<br>setup</button>
-
+   style='background:#dddcdc;'>NTP<br>setup</button>
   <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
-   style='background:lightblue;'>DDNS<br>setup</button>
-
+   style='background:#dddcdc;'>DDNS<br>setup</button>
   <button onclick="window.location.href='proc.html'"; class='SetupButton' 
    style='background:#ff9797;'>PROC.<br>MEMORY</button>       
 </p>      
-
-<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
-
-<p style="background-color:#ff9797; text-align:left; margin-left:10px;">
-   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
-    color:blue; vertical-align: middle;"
-    onclick="window.location.href='schem.html'">
-    </i></button>
-    &nbsp&nbsp&nbsp&nbsp<strong>Processor és Memória</strong></p>
-    
+<hr style="height:1px; background-color:black; margin-top:1px; margin-bottom:1px;">   
+<p style="background-color:#ff9797; text-align:left; margin-left:10px;
+          width: 342px; margin-top: 1px; margin-bottom: 1px;">
+   <button class="square_info">
+    <i class="fa fa-info-circle" style="font-size:28px; 
+    color:blue;" onclick="window.location.href='schem.html'">
+    </i>
+  </button>
+  <label class="label_i_sor">Processor és Memória</label></p>
 <hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:4px;">
+
+<!-- ---------------------------------------------------------------------------- -->
 
 <h4><u>Processor info:</u></h4>      
 
@@ -154,21 +151,22 @@
      
 <hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:6px;">  
 
+<label class="label_info">- Egyelőre csal próba, nem töröl! -</label>
 
 <p style="text-align:right; margin-right:5px;">
      <i  class="fa fa-cog fa-spin fa-3x fa-fw" 
      style=" font-size:30px; vertical-align:middle; margin-bottom: 8px;" id="BUSY_1"></i>
-    <button class="myB_eeprom" id="EE_CLEAR"
+    <button class="myB_proc" id="EE_CLEAR" style="width: 220px;"
      onclick="EE_CLEAR ();"><i class="fas fa-exclamation-triangle" 
-     style="color:yellow; font-size:25px;"></i>&nbsp&nbsp<span 
-     id="EE_C_TEXT">EEPROM CLEAR !!!</span></button>
+     style="color:yellow; font-size:20px;"></i>&nbsp&nbsp<span 
+     id="EE_C_TEXT">PreferencesCLEAR !</span></button>
 </p> 
 
 <hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px;">
 
-<h4>- teljes futásidő számláló -<br>
-    Percenként 1-el növekszik,<br>3 byte (240, 241, 242-es címen).<br>
-    Naponta kétszer, vagy web-es újraíndításkor menti az EEPROM-ba.</h4>
+<label class="label_info">- teljes futásidő számláló -<br>
+    Percenként 1-el növekszik,<br>
+    Naponta kétszer, vagy web-es újraíndításkor menti.</label>
 
 <p style="text-align:right; margin-right:5px; margin-top:1px; margin-bottom:1px;">
     <label class="label_1" >Év:</label>
@@ -187,14 +185,31 @@
 <p style="text-align:right; margin-right:5px;">
     <label class="label_1" >allrun_perc_int:</label>
     <input type="number" class="select_text_EE" id="RUN_ALL" 
-    style="width:180px;" min="0" max="16777215" step="1"     
+    style="width:160px;" min="0" max="16777215" step="1"     
     oninput="valtozas_2 ();" />    
 </p> 
 
 <p style="text-align:right; margin-right:5px;">
-    <button class="myB_eeprom" id="RUN_OWER_BUTTON"
+    <button class="myB_proc" id="RUN_OWER_BUTTON"
      onclick="RUN_write ();"><i class="fas fa-exclamation-triangle" 
-     style="color:yellow; font-size:25px;"></i>&nbsp&nbsp FELÜLÍRÁS !!!</button>
+     style="color:yellow; font-size:20px;"></i>&nbsp&nbsp FELÜLÍRÁS !</button>
+</p> 
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:6px;">
+
+<label class="label_info">- Proc. újraindult x-szer -</label>
+ 
+<p style="text-align:right; margin-right:5px;">
+    <label class="label_1" >Processor újraindult:</label>
+    <input type="number" class="select_text_EE" id="X_SZER" 
+    style="width:160px;" min="0" max="16777215" step="1"     
+    oninput="valtozas_3 ();" />    
+</p> 
+
+<p style="text-align:right; margin-right:5px;">
+    <button class="myB_proc" id="X_SZER_BUTTON"
+     onclick="XSZER_write ();"><i class="fas fa-exclamation-triangle" 
+     style="color:yellow; font-size:20px;"></i>&nbsp&nbsp FELÜLÍRÁS !</button>
 </p> 
 
 <hr style="height:1px; background-color:black">

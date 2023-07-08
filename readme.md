@@ -1,10 +1,9 @@
 
-# ESP8266 D1 mini Kültéri hőmérséklet, páratartalom és légnyomás mérő, loggoló
+# ESP8266 D1 mini full alap
 
-project áthelyezve: C:\VS_Code_ESP_PlatformIO\00_ESP8266_projectek\OUTDOOR_temp_log
 
-Temp_log program Web Stocked-el.
+Program Web Stocked-el.
+- stb. stb.
 - Visual Studio Code
 - Platform IO
 - GIThub
-- összes összetevő feltöltése: képek, excell, log-ok, grafikonrajzoló html, ico

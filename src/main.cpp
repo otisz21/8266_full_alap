@@ -1,7 +1,6 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
 #include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -10,8 +9,8 @@
 #include <AsyncElegantOTA.h>  // Elegant OTA 
 #include <FS.h>               // Fájlrendszer kezelés miatt, favicon.ico fájlként feltöltve
 #include <LittleFS.h>         // Fájlrendszer kezelés
-#include <EEPROM.h>
 #include <ArduinoJson.h>
+#include <Preferences.h>
 #include <time.h>             // time() ctime()
 #include <coredecls.h>        // settimeofday_cb() visszahívás ellenőrzéshez (NTP lekérdezés)     
 
@@ -23,8 +22,7 @@
 #define LED_PIN 2  // Use the built-in LED
 Led led(LED_PIN);  // led objektum, LED_PIN-t OUTPUT-ra állítja
 
-ESP8266WiFiMulti wifi_multi;
-
+Preferences pref;
 WiFiClient client;  // or WiFiClientSecure for HTTPS
 FtpServer ftpSrv;   // set #define FTP_DEBUG in ESP8266FtpServer.h to see ...
 AsyncWebServer server(TCP_PORT);       // TCP portszám: 80 (alap)
@@ -38,23 +36,39 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
   PROJECT_INFO();
-  //Adding the WiFi networks to the MultiWiFi instance
-  wifi_multi.addAP(ssid1, password1);
-  wifi_multi.addAP(ssid2, password2);
-  wifi_multi.addAP(ssid3, password3);
+
+  pref.begin("my-app", false);
+
+  proc_restart_num = pref.getUInt("counter", 0);
+  allrun_perc_int = pref.getUInt("allrun_perc", 0);
+  S_DEBUG = pref.getBool("S_DEBUG");
+  make_log = pref.getBool("make_log");
+  blue_led =  pref.getBool("blue_led");
+  wifi_pref_mode = pref.getBool("wifi_pref_mode");
+  ssid = pref.getString("ssid");
+  pass = pref.getString("pw");
+
+  proc_restart_num++;
+
+  Serial.printf("Current counter value: %u\n", proc_restart_num);
+  Serial.printf("allrun_perc_int value: %u\n", allrun_perc_int);
+  Serial.printf("S_DEBUG  value       : %u\n", S_DEBUG);
+  Serial.printf("make_log value       : %u\n", make_log);
+  Serial.printf("blue_led value       : %u\n", blue_led);    
+
+  pref.putUInt("counter", proc_restart_num);
+
+  pref.end();
 
   //WiFi.persistent(false);
   //WiFi.mode(WIFI_STA);
   WiFi.setHostname(project.c_str());
   
   Serial.println("Connecting ...");
-  int k = 0;                                 // nem működik, wifi_multi.run() "tartja" a programot
-  while (wifi_multi.run(connectTimeoutMs) != WL_CONNECTED) { // Várja meg, amíg a Wi-Fi csatlakozik: 
-    Serial.print(k);                         // keressen Wi-Fi hálózatokat, és csatlakozzon
-    Serial.print(" ");                       // a fenti hálózatok közül a legerősebbhez
-    delay(1000);
-    k++;
-  }
+    // ****************************************************************
+  if (initWiFi()) Serial.println(F("Setup / if (initWiFi())= TRUE (1), ===> Client mód!"));
+  else Serial.println(F("Setup / if (initWiFi())= FALSE(0), ===> AP mód!"));
+
   Serial.println('\n');
   Serial.print("Connected to:\t ");
   Serial.println(WiFi.SSID());          // Melyik hálózathoz csatlakozunk
@@ -78,36 +92,31 @@ void setup() {
     MDNS.addService("http", "tcp", 80);
     }
 
-  EEPROM.begin(256);
-  //EE_write_3byte (243, 244, 245, 80);
-
-  if (LittleFS.begin()) {
-    ftpSrv.setCallback(_callback);
-    ftpSrv.setTransferCallback(_transferCallback);
-    filesystem = "LittleFS";
-    Serial.println(F("LittleFS fájlrendszer elindítva!"));
-    Serial.print(F("FTP username: "));
-    Serial.println(F("esp8266"));
-    Serial.print(F("FTP pw.: "));
-    Serial.println(F("8266"));
-    Serial.println();
-    ftpSrv.begin("esp8266", "8266");     // username, password for ftp.   
-    }                                   // (default 21, 50009 for PASV) 
-
-  if (EEPROM.read(239) == 255) {
-    EEPROM_clear();
-    }
-  else {
-    EEPROM_read();
-    }
+    if (LittleFS.begin()) {
+      ftpSrv.setCallback(_callback);
+      ftpSrv.setTransferCallback(_transferCallback);
+      filesystem = "LittleFS";
+      Serial.println(F("LittleFS fájlrendszer elindítva!"));
+      Serial.print(F("FTP username: "));
+      Serial.println(F("esp8266"));
+      Serial.print(F("FTP pw.: "));
+      Serial.println(F("8266"));
+      Serial.println();
+      ftpSrv.begin("esp8266", "8266");     // username, password for ftp.   
+      }                                   // (default 21, 50009 for PASV) 
 
     configTime(MY_TZ, NTP_SERVER_1, NTP_SERVER_2);  //Mytz - Budapest
     settimeofday_cb(NTP_time_is_set);          // opcionális: visszahívás, ha elküldték az időt
 
-    delay(100);
 
+  if (WIFI_STA_or_AP == 1) {                      // wifi hálózat, 1->STA mód(client) 
 //**** automatikusan teljesülő kérések ******************************************  
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");                // Root/ xy  ==> fájl / xy automatikus teljesítése  
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+  }
+  else{                                            // wifi hálózat, 0->AP mód
+//**** automatikusan teljesülő kérések ******************************************  
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("wifi.html");  
+  }
 //--------------------------------------------------------------------------------
     
 //*******************************************************************************    
@@ -123,7 +132,6 @@ void setup() {
       serializeJson(IR, *response);
       request->send(response);});
 
-    //******************************************************************************** 
     //**** Info + Setup oldal ********************************************************
     //------------------------------------------------------------------------------  
     server.on("/setup_json", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -144,55 +152,83 @@ void setup() {
       request->send(response);
       });
 //--------------------------------------------------------------------------------
-  server.on("/setup_save", HTTP_GET, [](AsyncWebServerRequest *request){        // Info + Setup adatanak mentése             
-    make_log = (request->getParam("make_log")->value()).toInt(); 
-    S_DEBUG = (request->getParam("s_debug")->value()).toInt();
-    blue_led = (request->getParam("blue_led")->value()).toInt();
-    EEPROM.write (1, make_log);  
-    EEPROM.write (2, S_DEBUG);
-    EEPROM.write (3, blue_led);
-    EEPROM.commit();
-    request->send_P (200, "text/plain", "setup_SAVE_OK");});  
+    server.on("/setup_save", HTTP_GET, [](AsyncWebServerRequest* request) {        // Info + Setup adatanak mentése             
+      make_log = (request->getParam("make_log")->value()).toInt();
+      S_DEBUG = (request->getParam("s_debug")->value()).toInt();
+      blue_led = (request->getParam("blue_led")->value()).toInt();
+      pref.begin("my-app", false);
+      pref.putBool("S_DEBUG", S_DEBUG);
+      pref.putBool("blue_led", blue_led);
+      pref.putBool("make_log", make_log);
+      pref.end();
+      request->send_P(200, "text/plain", "setup_SAVE_OK");});
 
 //********************************************************************************
 //**** WIFI setup oldal **********************************************************
 //--------------------------------------------------------------------------------
-  server.on("/wifi_json", HTTP_GET, [](AsyncWebServerRequest *request) {           // WIFI-Setup oldal JSON adatok küldése
-      AsyncResponseStream *response = request->beginResponseStream("application/json");
-        DynamicJsonDocument WIFI_json(384);    
-        WIFI_json["ssid"] = String (WiFi.SSID());
-        WIFI_json["ip"] = WiFi.localIP().toString();
-        WIFI_json["port"] = String (TCP_PORT);
-        WIFI_json["rssi"] = String (WiFi.RSSI());
-        WIFI_json["wifi_mac"] = String(WiFi.macAddress());
-        //WIFI_json["ap_ssid"] = String(TEMP_LOG_ssid);
- 
-     if (WiFi.status() == 0){
-        WIFI_json["W_status"] = "WL_IDLE_STATUS";}
-     if (WiFi.status() == 1){
-        WIFI_json["W_status"] = "WL_NO_SSID_AVAIL";}
-     if (WiFi.status() == 2){
-        WIFI_json["W_status"] = "WL_SCAN_COMPLETED";}
-     if (WiFi.status() == 3){
-        WIFI_json["W_status"] = "WL_CONNECTED";}
-     if (WiFi.status() == 4){
-        WIFI_json["W_status"] = "WL_CONNECT_FAILED";}
-     if (WiFi.status() == 5){
-        WIFI_json["W_status"] = "WL_CONNECTION_LOST";}
-     if (WiFi.status() == 6){
-        WIFI_json["W_status"] = "WL_DISCONNECTED";}
-     if (WiFi.status() == 7){
-        WIFI_json["W_status"] = " 7 - ??? - ";} 
-     if (WiFi.status() == 255){
-        WIFI_json["W_status"] = "WL_NO_SHIELD";}                       
+  server.on("/wifi_json", HTTP_GET, [](AsyncWebServerRequest* request) {           // WIFI-Setup oldal JSON adatok küldése
+    AsyncResponseStream* response = request->beginResponseStream("application/json");
+    DynamicJsonDocument WIFI_json(512);
 
-      serializeJson(WIFI_json, *response);
-      request->send(response);});
+    JsonArray wifi_alap = WIFI_json.createNestedArray("wifi_alap");
+    wifi_alap.add(wifi_mode_to_string(WiFi.getMode()));  // [0] 
+  if (WIFI_STA_or_AP == 1) {                      // wifi hálózat, 1->STA mód(client) 
+    wifi_alap.add(WiFi.SSID());                          // [1] 
+    wifi_alap.add(WiFi.localIP().toString());            // [2]
+  }
+  else{                                            // wifi hálózat, 0->AP mód
+    wifi_alap.add(AP_ssid);                              // [1] 
+    wifi_alap.add(WiFi.softAPIP());                      // [2]   
+  }
+    wifi_alap.add(mdns_name);                            // [3]
+    wifi_alap.add(TCP_PORT);                             // [4]
+    wifi_alap.add(WiFi.RSSI());                          // [5]
+    wifi_alap.add(WiFi.macAddress());                    // [6]
+    wifi_alap.add(wifi_status_to_string(WiFi.status())); // [7]
+    wifi_alap.add(AP_ssid);                              // [8]
+
+    JsonArray wifi_scan = WIFI_json.createNestedArray("wifi_scan");
+    wifi_scan.add(WIFI_drb_int);                            // [0] talált wifi db.
+    for (int i = 0; i < WIFI_drb_int; i++) {
+      wifi_scan.add(RSSI_sort_int[i]);                      // [1]-[3]-[5]...stb.
+      wifi_scan.add(SSID_sort_string[i]);                   // [2]-[4]-[6]...stb.
+      }
+
+    serializeJson(WIFI_json, *response);
+    request->send(response);});
+
+//-- wifi oldal reset mentés nélkül  ----------------------------------
+  server.on("/wifi_reset", HTTP_GET, [](AsyncWebServerRequest* request) {
+    WEB_action_b = 11;      //Reset loop-ban
+    WEB_delay_ul = millis();
+    request->send_P(200, "text/plain", "RESET!");}); 
+
 //--------------------------------------------------------------------------------
-  server.on("/WIFI_save", HTTP_GET, [](AsyncWebServerRequest *request){        // Ha a kérés: WIFI_action 
-    WEB_action_b = (request->getParam("x")->value()).toInt();  // WIFI_action 10-restart, 13-restart+CONFIG
-    WEB_delay_ul = millis();                                 
-    request->send_P(200, "text/plain", "WIFI_action OK!");}); 
+  server.on("/wifi_rescan", HTTP_GET, [](AsyncWebServerRequest* request) {
+    WEB_action_b = 12;      // WIFI SCAN loop-ban
+    WEB_delay_ul = millis();
+    request->send_P(200, "text/plain", "WIFI_rescan OK!");});
+
+
+//-- wifi oldal SAVE data és reset -- <form action="/" method="POST"> HTML method---- 
+  server.on("/W_data", HTTP_POST, [](AsyncWebServerRequest* request) {      // SSID, pw adatok mentése
+    WIFI_STA_or_AP = (request->getParam("wifi_mode")->value()).toInt(); // wifi hálózat 0->AP-mód, 1->STA mód(client) 
+    pref.begin("my-app", false);
+    if (WIFI_STA_or_AP == 1) {                        // wifi hálózat, 1->STA mód(client)     
+      ssid = (request->getParam("ssid")->value());
+      pass = (request->getParam("pasw")->value());
+      pref.putString("ssid", ssid);
+      pref.putString("pw", pass);
+      pref.putBool("wifi_pref_mode", WIFI_STA_or_AP); // STA mód (Client)
+      }
+    if (WIFI_STA_or_AP == 0) {                        // wifi hálózat, 0->AP-mód  
+      pref.putBool("wifi_pref_mode", WIFI_STA_or_AP); // AP mód
+      }
+    WEB_action_b = 11;        // Reset loop-ban
+    WEB_delay_ul = millis();
+    pref.end();
+    request->send(200, "text/plain", "Done. ESP will restart, connect to : " + ssid);});
+
 
 //*********************************************************************************
 //**** NTP setup oldal ************************************************************
@@ -214,77 +250,88 @@ void setup() {
 
 //*********************************************************************************
 //**** DDNS setup oldal ***********************************************************
-  server.on("/ddns_json", HTTP_GET, [](AsyncWebServerRequest *request) {  
-      AsyncResponseStream *response = request->beginResponseStream("application/json"); 
-      DynamicJsonDocument DDNS_adatok(512);
-      JsonArray data = DDNS_adatok.createNestedArray("data");        
-      data.add(DDNS_ON);                 // [0] bájt 
-      data.add(DDNS_DOMAIN);             // [1] String 
-      data.add(WAN_IP_CHECK_TIME);       // [2] int. update time sec. max.: 65 535 2 byt-on 
-      data.add(WAN_old_IP);              // [3] String
-      data.add(WAN_new_IP);              // [4] String
-      data.add(LAST_IP_CHANGED);         // [5] String
-      data.add(noip_answer);             // [6] String
-      data.add(WAN_T);                   // [7] WAN IP check time
-      data.add(WAN_S);                   // [8] WAN IP check status
-      serializeJson(DDNS_adatok, *response);
-      request->send(response);});
-// --------------------------------------------------------------------------
-  server.on("/ddns_save", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/ddns_json", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncResponseStream* response = request->beginResponseStream("application/json");
+    DynamicJsonDocument DDNS_adatok(512);
 
-    DDNS_ON = (request->getParam("D_1")->value()).toInt();
-    WAN_IP_CHECK_TIME = (request->getParam("D_2")->value()).toInt();
-    DDNS_DOMAIN = (request->getParam("D_3")->value());    
-                   
-    EEPROM.write(134, DDNS_ON); 
-    EE_write_2byte (132, 133, WAN_IP_CHECK_TIME);
-    writeString (84, DDNS_DOMAIN);
-    request->send_P(200, "text/plain", "DDNS adatok: OK");});  
+    JsonArray ddns = DDNS_adatok.createNestedArray("ddns");
+    ddns.add(TIME_STRING);          // [0]  
+    ddns.add(DATE_STRING);          // [1]
+    ddns.add(DAYNAME);              // [2]
 
-//-------------------------------------------------------------------------------
-  server.on("/check_WAN_IP", HTTP_GET, [](AsyncWebServerRequest *request){     
-      WEB_delay_ul = millis();
-      WEB_action_b = 18;   
-    request->send_P (200, "text/plain", "check_WAN_IP: OK");}); 
-
-//-------------------------------------------------------------------------------
-  server.on("/NO_IP_update", HTTP_GET, [](AsyncWebServerRequest *request){     
-      WEB_delay_ul = millis();
-      WEB_action_b = 19;   
-    request->send_P (200, "text/plain", "NO_IP_update: OK");});     
+    serializeJson(DDNS_adatok, *response);
+    request->send(response);});
 
 //*********************************************************************************
 //**** EEPROM PAGE ******************************************************
 //-------------------------------------------------------------------------------
-  server.on("/proc_json", HTTP_GET, [](AsyncWebServerRequest *request) {     // JSON adatok EEPROM és mem.
-      request->send(200, "text/plain", CHIP_INFO_8266_json()); });
+  // server.on("/proc_json", HTTP_GET, [](AsyncWebServerRequest *request) {     // JSON adatok EEPROM és mem.
+  //     request->send(200, "text/plain", CHIP_INFO_8266_json()); });
+
+  server.on("/proc_json", HTTP_GET, [](AsyncWebServerRequest* request) {     // JSON adatok EEPROM és mem.
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument PROC_json(512);
+    JsonArray data = PROC_json.createNestedArray("proc");
+    data.add(ESP.getVcc() * 1.12 / 1023.0);         // [0] Proc Vcc  (D1 mininél)
+    data.add(ESP.getChipId());                  // [1] ESP8266 chip ID 
+    data.add(ESP.getCoreVersion());             // [2] alapverzió
+    data.add(ESP.getSdkVersion());              // [3] SDK-verzió
+    data.add(ESP.getCpuFreqMHz());              // [4] CPU frekvenciája MHz-ben
+    //-------------------------------------
+    data.add(ESP.getSketchSize());              // [5] SketchSize, byte
+    data.add(ESP.getFreeSketchSpace());         // [6] FreeSketchSpace, byte
+    //-------------------------------------
+    data.add(ESP.getFlashChipId());             // [7] flash chip azonosító
+    data.add(ESP.getFlashChipRealSize());       // [8] Flash chip size
+    data.add(ESP.getFlashChipSpeed() / 1000000);  // [9] Flash chip frekvenciája MHz-ben
+    //-------------------------------------
+    data.add(ESP.getFreeHeap());                // [10] szabad kupac méreté
+    data.add(ESP.getMaxFreeBlockSize());        // [11] legnagyobb összefüggő szabad RAM
+    data.add(ESP.getHeapFragmentation());       // [12] HEAP töredezettség %-ban
+    //-------------------------------------
+    data.add(proc_restart_num);                 // [13] Proc. újraindult x-szer     
+    data.add(ESP.getResetReason());             // [14] utolsó visszaállítás oka 
+    //-------------------------------------
+    FSInfo fs_info;
+    LittleFS.info(fs_info);
+    used_FS_percent = ((float(fs_info.usedBytes) * 100.0) / float(fs_info.totalBytes));
+    data.add(filesystem);                       // [15] Filesysten tipusa
+    data.add(fs_info.totalBytes);               // [16] Total space (byte)
+    data.add(fs_info.usedBytes);                // [17] Total space used (byte)
+    data.add(used_FS_percent);                  // [18] használatban lévő tárhely 
+    //-------------------------------------            
+    data.add(allrun_perc_int);                  // [19] teljes futásidő     
+    //-------------------------------------
+    serializeJson(PROC_json, *response);
+    request->send(response);});
 //-------------------------------------------------------------------------------
   server.on("/EE_clear", HTTP_GET, [](AsyncWebServerRequest *request){     
       WEB_delay_ul = millis();
-      WEB_action_b = 12;   
+      WEB_action_b = 14;        //EE_clear
     request->send_P (200, "text/plain", "INFO adatok: OK");}); 
 //-------------------------------------------------------------------------------
-  server.on("/ALL_RUN", HTTP_GET, [](AsyncWebServerRequest *request){        //  EEPROM értékek beírása             
-      allrun_perc_int = (request->getParam("data")->value()).toInt();
-      EE_write_3byte  (240, 241, 242, allrun_perc_int);
-      if(S_DEBUG)Serial.print(F("EE_write_3byte (allrun_perc_int): "));    
-      if(S_DEBUG)Serial.println(allrun_perc_int);
-    request->send_P (200, "text/plain", "INFO adatok: OK");}); 
+  server.on("/ALL_RUN", HTTP_GET, [](AsyncWebServerRequest* request) {        //  EEPROM értékek beírása             
+    allrun_perc_int = (request->getParam("data")->value()).toInt();
+
+    pref.begin("my-app", false);
+    pref.putUInt("allrun_perc", allrun_perc_int);
+    pref.end();
+
+    if (S_DEBUG)Serial.print(F("pref.putUInt(allrun_perc_int): "));
+    if (S_DEBUG)Serial.println(allrun_perc_int);
+    request->send_P(200, "text/plain", "INFO adatok: OK");});
 
 //-------------------------------------------------------------------------------
-  server.on("/X_SZER", HTTP_GET, [](AsyncWebServerRequest *request){        //  EEPROM értékek beírása             
-      proc_restart_num = (request->getParam("data")->value()).toInt();
-      EE_write_3byte (243, 244, 245, proc_restart_num);
-      if(S_DEBUG)Serial.print(F("EE_write_3byte (proc_restart_num): "));    
-      if(S_DEBUG)Serial.println(proc_restart_num);
-    request->send_P (200, "text/plain", "X_szer: OK");}); 
-           
-//--------------------------------------------------------------------------------  
-  server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request) {              // Info + Setup oldalról RESET!
-      Serial.println(F("RESET!")); 
-      WEB_delay_ul = millis();
-      WEB_action_b = 10; 
-      request->send_P (200, "text/plain", "RESET!");});
+  server.on("/X_SZER", HTTP_GET, [](AsyncWebServerRequest* request) {        //  EEPROM értékek beírása             
+    proc_restart_num = (request->getParam("data")->value()).toInt();
+
+    pref.begin("my-app", false);
+    pref.putUInt("counter", proc_restart_num);
+    pref.end();
+    
+    if (S_DEBUG)Serial.print(F("putUInt(proc_restart_num): "));
+    if (S_DEBUG)Serial.println(proc_restart_num);
+    request->send_P(200, "text/plain", "X_szer: OK");});
 
 
 //-- Info & Setup oldal 1.gomb  --------------------------------------------------  
@@ -360,8 +407,6 @@ void setup() {
   server.addHandler(&ws);  
   server.begin();                         // Server indítása
 
-  CHIP_INFO_8266_print();
-
   Serial.println();
   Serial.println(F(" * * * * * SETUP VÉGE * * * * "));
   Serial.println();
@@ -400,11 +445,12 @@ void loop() {
       Serial.print("Hostname   : "); Serial.println(WiFi.getHostname());
       Serial.print("WiFi MAC   : "); Serial.println(WiFi.macAddress());
       //wl_status_t w_status = WiFi.status();
-      Serial.print("WiFi status: "); Serial.println(wl_status_to_string(WiFi.status()));
-
+      Serial.print("WiFi status: "); Serial.println(wifi_status_to_string(WiFi.status()));
 
       Serial.print("gateway-IP : "); Serial.println(WiFi.gatewayIP());
-      Serial.print("wifi-Mode  : "); Serial.println(WiFi.getMode());
+      Serial.print("wifi-Mode  : "); Serial.println(wifi_mode_to_string(WiFi.getMode()));
+      // WiFi.getMode() =  // 0=WIFI_OFF,  1=WIFI_STA,  2=WIFI_AP,  3=WIFI_AP_STA
+
       Serial.print("SleepMode  : "); Serial.println(WiFi.getSleepMode());
       Serial.print("AutoConnect: "); Serial.println(WiFi.getAutoReconnect());
       Serial.println();
@@ -412,11 +458,6 @@ void loop() {
       S_deb_valt = S_DEBUG;
     }
 // ****************************************************************
-
-// **** WAN IP ellenőrzése beállított időközönként !  *************************
-    if ((DDNS_ON == 1)&(millis() - previousMillis >= WAN_IP_CHECK_TIME*1000)) {
-      previousMillis = millis();
-      WAN_IP_CHECK_easyddns(0);}
 
 // Soros vonalon kapott üzenetet hozzáírja az aktuális SD card log fájlhoz
 // PRÓBA!!! 
@@ -434,22 +475,16 @@ void loop() {
   else {
     Serial.println(F("incomming_COM.txt write ERROR"));}}
     
-
 // ****************************************************************   
 /* **** WEB-ről érkező parancsok késleltetéssel!  *****************
    // WEB_action_b = 0  --> nem csinál semmit 
    // WEB_action_b = 1-10  --> Setup oldalon gombok 1-10 
-   // WEB_action_b = 10  --> reset
-   // WEB_action_b = 12  --> EEPROM Clear
-   // WEB_action_b = 13  --> RESTART + CONFIG, webről, vagy hosszú gombnyomás
-   // WEB_action_b = 14  --> SD DIR listázása
-   // WEB_action_b = 15  --> SD card újracsatlakoztatás
-   // WEB_action_b = 16  --> SD card újracsatlakoztatás eredménye kis késéssel
-   // WEB_action_b = 17  --> GET tempek hő és pára lekérése másik eszközről
-   // WEB_action_b = 18  --> check_WAN_IP
-   // WEB_action_b = 19  --> NO_IP_update
+   // WEB_action_b = 11  --> ESP reset
+   // WEB_action_b = 12  --> WiFi Scan
+   // WEB_action_b = 13  --> NTP sync -> last_sinc_string
+   // WEB_action_b = 14  --> EEPROM CLEAR -semmi- delay send WS
+   // WEB_action_b = 15  -->
 */
-
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 1) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.print(F("Button: 1"));
@@ -502,60 +537,61 @@ void loop() {
 
     WEB_action_b = 0;
     }
-                           
+// --- Setup oldalon gombok 1-10 ---------------
+  if ((WEB_action_b == 10) & (millis() - WEB_delay_ul > 200)) {
+    if(S_DEBUG)Serial.print(F("Button: 10"));
 
-// --- 10  --> (reset és WifiManager save + reset)---------------
-  if ((WEB_action_b == 10)&(millis()-WEB_delay_ul > 500)){ 
-      EE_write_3byte  (240, 241, 242, allrun_perc_int);
-      if(S_DEBUG)Serial.print(F("EE_write_3byte (allrun_perc_int): "));
-      if(S_DEBUG)Serial.println(allrun_perc_int);
-      WEB_action_b = 0;
-      ESP.restart();}   
+    WEB_action_b = 0;
+    }                            
       
-// --- 12  --> (EEPROM Clear)---------------
-  if ((WEB_action_b == 12)&(millis()-WEB_delay_ul > 500)){ 
-      EEPROM_clear ();                    
-      WEB_action_b = 0;}                
-
-  // --- 14  --> Soros monitor SD/dir/fájl listázás -------
-  if ((WEB_action_b == 14) & (millis() - WEB_delay_ul > 500)) {
-    // File root;
-    // root = LittleFS.open("/");
-    // printDirectory(root, 0);
-    // WEB_action_b = 0;
+// --- 11  --> (EEPROM Clear)---------------
+  if ((WEB_action_b == 11) & (millis() - WEB_delay_ul > 300)) {
+    pref.begin("my-app", false);
+    pref.putUInt("allrun_perc", allrun_perc_int);
+    pref.end();
+    if (S_DEBUG)Serial.println(F("pref.putUInt(allrun_perc, allrun_perc_int)"));
+    if (S_DEBUG)Serial.println(F("RESTART"));
+    WEB_action_b = 0;
+    ESP.restart();
     }
 
-// --- 17  --> GET tempek hő és pára lekérése másik eszközről -------
-  if ((WEB_action_b == 17)&(millis()-WEB_delay_ul > 500)){ 
-      tempek(mi);     // mi=0-semmi, mi=10-összes, mi=2-kert, mi=3-konyha... stb.,
-      WEB_action_b = 0;}
+  // --- 12  --> WIFI-scan  -------
+  if ((WEB_action_b == 12) & (millis() - WEB_delay_ul > 300)) {
+    if (S_DEBUG)Serial.println(F("- - WIFI RESCAN! - -"));
+    WIFI_SCAN();
+    DynamicJsonDocument adatok(512);
+    JsonArray wifi_scan = adatok.createNestedArray("wifi_scan");
+    wifi_scan.add(WIFI_drb_int);                            // [0] talált wifi db.
+    for (int i = 0; i < WIFI_drb_int; i++) {
+      wifi_scan.add(RSSI_sort_int[i]);                      // [1]-[3]-[5]...stb.
+      wifi_scan.add(SSID_sort_string[i]);                   // [2]-[4]-[6]...stb.
+      }
+    String buf;
+    serializeJson(adatok, buf);
+    ws.textAll("05" + buf);
+    WEB_action_b = 0;
+    }
 
-// --- 18  --> GET tempek hő és pára lekérése másik eszközről -------
-  if ((WEB_action_b == 18)&(millis()-WEB_delay_ul > 500)){ 
-      WAN_new_IP.fromString("100.100.100.100");
-      WAN_IP_CHECK_easyddns(1);
-      previousMillis = 0;      
-      WEB_action_b = 0;}
-
-// --- 19  --> GET tempek hő és pára lekérése másik eszközről -------
-  if ((WEB_action_b == 19)&(millis()-WEB_delay_ul > 500)){ 
-      NO_IP_update();
-      WEB_action_b = 0;}
-      
-// --- 20 NTP sync + 300ms késleltetéssel ------------------------------
-  if ((WEB_action_b == 11) & (WEB_delay_ul + 300 < millis())){
-      if (S_DEBUG)
-      Serial.println(F("11. NTP sync +  300ms késleltetéssel"));
+// --- 13  -->  NTP sync -> last_sinc_string -------
+  if ((WEB_action_b == 13)&(millis()-WEB_delay_ul > 300)){ 
+      if (S_DEBUG) Serial.println(F("13. NTP sync +  300ms késleltetéssel"));
       NTP_LASTSYNC_STRING = "";
       NTP_LASTSYNC_STRING = DATE_STRING;
       NTP_LASTSYNC_STRING += " - ";
       NTP_LASTSYNC_STRING += TIME_STRING;
-      WEB_delay_ul = millis();
       WEB_action_b = 0;
-  }
+      }
 
+// --- 14  -->  EEPROM CLEAR -semmi, send WS -------
+  if ((WEB_action_b == 14)&(millis()-WEB_delay_ul > 3000)){   // 3 mp!
+      ws.textAll("30");
+      WEB_action_b = 0;}
 
-// **************************************************************** 
+// --- 15  -->  -------
+  if ((WEB_action_b == 15)&(millis()-WEB_delay_ul > 300)){ 
+
+      WEB_action_b = 0;}
+      
 
 // ****** időkezelés **********************************              
   // ------------------ idő -------------------------------------------                 
@@ -564,20 +600,6 @@ void loop() {
     // Serial.print(F("Cycle/mp: "));
     // Serial.println(cycle);
     // cycle = 0;
-    if (wifi_multi.run(connectTimeoutMs) == WL_CONNECTED) {
-      ssid_changed = WiFi.SSID();
-      }
-    else {
-      if (S_DEBUG) Serial.println("WiFi not connected!");
-      }
-    if (ssid_changed != ssid_changed_old) {
-      if (S_DEBUG) Serial.print("WiFi connected: ");
-      if (S_DEBUG) Serial.print(WiFi.SSID());
-      if (S_DEBUG) Serial.print("  ");
-      if (S_DEBUG) Serial.print(WiFi.RSSI());
-      if (S_DEBUG) Serial.println(" dBm");
-      ssid_changed_old = ssid_changed;
-      }
     if (blue_led == 1) {
       led_state = !led_state;             // LED villogtatás
       if (led_state) led.on();
@@ -634,7 +656,7 @@ void loop() {
     // *** minden 10. mp-b0en, char=0 -> byte=48 ***********************
     if (mp_x_dik == 48) {
       //if (S_DEBUG)Serial.println(F("* * xx0. mp * *"));
-      WS_send_10mp();
+      ws.textAll("01"+TIME_STRING);
       mp_x_dik = 100;
       }
 
@@ -726,7 +748,7 @@ void loop() {
 // ***** futásidő számlálót EEPROM-ba ********************************************************************
 // ** minden nap 11:01:01, és 23:01:01-kor, csak egyszer, elmenti a teljes futásidő számlálót EEPROM-ba **
    if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 1) & (N_SEC == 1) & (run_save_egyszer == 0)) {
-     EE_write_3byte(240, 241, 242, allrun_perc_int);        // teljes futásidő, percben      
+            // teljes futásidő, percben      
      if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
      if (S_DEBUG)Serial.print(F("futásidő mentés:  "));
      if (S_DEBUG)Serial.println(DATE_STRING + " - " + TIME_STRING);
@@ -746,7 +768,6 @@ void loop() {
     } // LOOP vége
 
 #include "F_system.h"
-#include "F_chip_info.h"
 #include "F_SD_filesystem.h"
    
 // ***** LOOP vége **********************************************************

@@ -42,7 +42,7 @@ document.getElementById("OUTPUT").innerHTML = ""+
         
         // DDNS_adatok = JSON.parse(pr_json);
         
-      //console.log(JSON.stringify(DDNS_adatok,null,'\t'));      // "szépen" kiírt JSON
+      console.log(JSON.stringify(DDNS_adatok,null,'\t'));      // "szépen" kiírt JSON
       
       if (DDNS_adatok.data[0] == 1) document.getElementById("DDNS_ONOFF").checked = true;
       else document.getElementById("DDNS_ONOFF").checked = false;

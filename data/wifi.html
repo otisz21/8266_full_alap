@@ -14,80 +14,188 @@
 </head>
 
 <body>
-<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;"> 
-<p>
-  <button onclick="window.location.href='setup.html'"; class='SetupButton' 
-   style='background:#E8DAEF;'>INFO<br>& setup</button>
 
-  <button onclick="window.location.href='wifi.html'" class='SetupButton'
-   style='background:#FFFFC3;'>WIFI<br>setup</button>
-   
- <button onclick="window.location.href='index.html'" class='SetupButton'
-  style='background:lightgreen;'><i class="fa fa-home" ></i><br>HOME</button>    
-</p>
-<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:6px;">
-<p>   
-  <button onclick="window.location.href='ntp.html'" class='SetupButton' 
-   style='background:#82E0AA;'>NTP<br>setup</button>
+  <hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+  <p>
+    <button onclick="window.location.href='setup.html'" ; class='SetupButton' style='background:#dddcdc;'>INFO<br>&
+      setup</button>
+    <button onclick="window.location.href='wifi.html'" class='SetupButton'
+      style='background:#ffff9b;'>WIFI<br>setup</button>
+    <button onclick="window.location.href='index.html'" class='SetupButton' style='background:lightgreen'><i
+        class="fa fa-home"></i><br>HOME</button>
+  </p>
+  <hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">
+  <p>
+    <button onclick="window.location.href='ntp.html'" class='SetupButton'
+      style='background:#dddcdc;'>NTP<br>setup</button>
+    <button onclick="window.location.href='ddns.html'" ; class='SetupButton'
+      style='background:#dddcdc;'>DDNS<br>setup</button>
+    <button onclick="window.location.href='proc.html'" ; class='SetupButton'
+      style='background:#dddcdc;'>PROC.<br>MEMORY</button>
+  </p>
+  <hr style="height:1px; background-color:black; margin-top:1px; margin-bottom:1px;">
+  <p style="background-color:#ffff9b; text-align:left; margin-left:10px;
+                  width: 342px; margin-top: 1px; margin-bottom: 1px;">
+    <button class="square_info">
+      <i class="fa fa-info-circle" style="font-size:28px; 
+            color:blue;" onclick="window.location.href='schem.html'"></i>
+    </button>
+    <label class="label_i_sor">WIFI INFO & SETUP</label>
+  </p>
+  <hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:4px;">
+  
+  <!-- ---------------------------------------------------------------------------- -->  
 
-  <button onclick="window.location.href='ddns.html'"; class='SetupButton' 
-   style='background:lightblue;'>DDNS<br>setup</button>
-
-  <button onclick="window.location.href='proc.html'"; class='SetupButton' 
-   style='background:#ff9797;'>PROC.<br>MEMORY</button>       
-</p>      
-<hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;">
-
-<p style="background-color:#FFFFC3; text-align:left; margin-left:10px;">
-   <button class="square_info"><i class="fa fa-info-circle" style="font-size:35px; 
-    color:blue; vertical-align: middle;"   
-    onclick="window.location.href ='schem.html'">
-    </i></button>
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<strong>WIFI INFO & SETUP</strong></p>
-
-<hr style="height:1px; background-color:black; margin-top:2px; margin-bottom:2px;">      
-
-      <div class="hyp">&nbsp
-        <div class="first">WIFI connect mode :</div>
-        <div class="second"><span id='J_wifi_mode'>Cient vs. AP</span></div>
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">Connect mode :</div>
+        <div class="second_w_alap"><span id="WIFI_0">WIFI_0</span></div>
       </div>
      
-      <div class="hyp">&nbsp
-        <div class="first">WIFI SSID :</div>
-        <div class="second"><span id='J_ssid'></span></div>
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">WIFI SSID :</div>
+        <div class="second_w_alap"><span id="WIFI_1">WIFI_1</span></div>
       </div>
       
-      <div class="hyp">&nbsp
-        <div class="first">Local IP :</div>
-        <div class="second"><span id='J_ip'></span></div>
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">Local IP :</div>
+        <div class="second_w_alap"><span id="WIFI_2">WIFI_2</span></div>
       </div>
 
-      <div class="hyp">&nbsp
-        <div class="first">TCP/IP port:</div>
-        <div class="second"><span id='J_port'>xx</span></div>
-      </div>
-      
-      <div class="hyp">&nbsp
-        <div class="first">WIFI RSSI :</div>
-        <div class="second"><span id='J_rssi'></span> dBm</div>
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">mDNS url:</div>
+        <div class="second_w_alap"><span id="WIFI_3">WIFI_3</span></div>
       </div>
 
-      <div class="hyp">&nbsp
-        <div class="first">WIFI MAC :</div>
-        <div class="second"><span id='J_mac'></span></div>
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">TCP/IP port:</div>
+        <div class="second_w_alap"><span id="WIFI_4">WIFI_4</span></div>
       </div>
 
-      <div class="hyp">&nbsp
-        <div class="first">Wi-Fi status :</div>
-        <div class="second"><span id='W_status'></span></div>
-      </div>  
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">WIFI RSSI :</div>
+        <div class="second_w_alap"><span id="WIFI_5">WIFI_5</span> dBm</div>
+      </div>
 
-<hr style="height:1px; background-color:black; margin-top:10px; margin-bottom:10px;">   
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">WIFI MAC :</div>
+        <div class="second_w_alap"><span id="WIFI_6">WIFI_6</span></div>
+      </div>
 
-    <button class="myButton myB_wifi" style="width:90%; " 
-            onclick="W_RESET ();" >RESTART<br>!!!</button>                     
+      <div class="hyp_w_alap">&nbsp
+        <div class="first_w_alap">Wi-Fi status :</div>
+        <div class="second_w_alap"><span id="WIFI_7">WIFI_7</span></div>
+      </div>   
+
+<hr style="height:1px; background-color:black; margin-top:10px; 
+           width:80%; margin-bottom:2px;">
+
+<h2 style="margin-bottom: 20px; margin-top: 2px;"><label class="label_text"> Wi-Fi maradjon AP módban:</label>
+  <input type="checkbox" id="NO_WIFI" onchange="no_wifi ()" />
+</h2>
+
+<div id="NO_WIFI_INFO">
+  <label class="info_sor_3">Hozzáférési pontot hoz létre! (AP)</label>
+  <div class="hyp">&nbsp
+    <div class="first">AP SSID :</div>
+    <div class="second"><span id='AP_SSID'></span></div>
+  </div>
+  <div class="hyp">&nbsp
+    <div class="first">AP local IP :</div>
+    <div class="second">192.168.4.1</div>
+  </div>
+</div>
+
+<hr style="height:1px; background-color:black; margin-top:10px; 
+           width:80%; margin-bottom:8px;">
+
+<div id="WIFI_VAN">
+
+    <div class="hyp" onclick="SSID_1_TXT ();">&nbsp
+      <div class="first">talált Wi-Fi:</div>
+      <div class="second"><span id='w_db'></span> db</div>
+    </div>
+    
+<hr style="height:1px; background-color:black; margin-top:6px; 
+           width:60%; margin-bottom:2px;"/>
+           
+  <div class="hyp_w_scan" onclick="SSID_1_TXT ();">&nbsp
+    <div class="first_w_scan" style="font-size:14px;">jelerősség (dBm) - </div>
+    <div class="second_w_scan" style="font-size:14px;">SSID (Wi-Fi hálózat)</div>
+  </div>
+    
+<hr style="height:1px; background-color:black; width:60%; 
+           margin-top:6px; margin-bottom:-4px;"/>
+ 
+<h2 style="color:red;" id="egysem_txt" >Nem található egy Wi-Fi hálózat sem!</h2>
+ 
+  <div class="hyp_w_scan" id="_1" onclick="SSID_1_TXT ();">&nbsp
+    <div class="first_w_scan">1.&nbsp&nbsp<span id='R_1'>RSSI-1</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_1'>SSID-1</span></u></div>
+  </div>
+
+  <div class="hyp_w_scan" id="_2" onclick="SSID_2_TXT ();">&nbsp
+    <div class="first_w_scan">2.&nbsp&nbsp<span id='R_2'>RSSI-2</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_2'>SSID-2</span></u></div>
+  </div>
   
-     <h3> >>> OTT <<< </h3>
+  <div class="hyp_w_scan" id="_3" onclick="SSID_3_TXT ();">&nbsp
+    <div class="first_w_scan">3.&nbsp&nbsp<span id='R_3'>RSSI-3</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_3'>SSID-3</span></u></div>
+  </div>
+
+  <div class="hyp_w_scan" id="_4" onclick="SSID_4_TXT ();">&nbsp
+    <div class="first_w_scan">4.&nbsp&nbsp<span id='R_4'>RSSI-4</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_4'>SSID-4</span></u></div>
+  </div>
+
+  <div class="hyp_w_scan" id="_5" onclick="SSID_5_TXT ();">&nbsp
+    <div class="first_w_scan">5.&nbsp&nbsp<span id='R_5'>RSSI-5</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_5'>SSID-5</span></u></div>
+  </div> 
+
+  <div class="hyp_w_scan" id="_6" onclick="SSID_6_TXT ();">&nbsp
+    <div class="first_w_scan">6.&nbsp&nbsp<span id='R_6'>RSSI-6</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_6'>SSID-6</span></u></div>
+  </div> 
+  
+  <div class="hyp_w_scan" id="_7" onclick="SSID_7_TXT ();">&nbsp
+    <div class="first_w_scan">7.&nbsp&nbsp<span id='R_7'>RSSI-7</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_7'>SSID-7</span></u></div>
+  </div> 
+
+  <div class="hyp_w_scan" id="_8" onclick="SSID_8_TXT ();">&nbsp
+    <div class="first_w_scan">8.&nbsp&nbsp<span id='R_8'>RSSI-8</span> dBm |</div>
+    <div class="second_w_scan"><u><span id='S_8'>SSID-8</span></u></div>
+  </div>         
+
+  <input type ="button" class="wifi_button" value ="Wi-Fi Rescan"
+          id="rescan_B" onclick="rescan();"></input>
+     
+<hr style="height:1px; background-color:black; margin-top:6px; 
+           width:60%; margin-bottom:4px;">
+
+    <p style="text-align: right; margin-right: 10px;"><label class="label_text">SSID:</label>
+    <input type="text" oninput="valtozas_ssid()" id="ssid_data" /></p>
+
+    <p style="text-align: right; margin-right: 10px;"><label class="label_text">Password:</label>
+      <input type="text" oninput="valtozas_ssid()" id="pass_data" /></p>
+
+
+
+    <h2 class="label_mdns">
+      STA módban, ha van mDNS szolgáltatás, elérhető<br>
+      ezen a címen is: <span class="label_mdns_cim" id="MDNS_txt">hzzzp</span> 
+    </h2> <br>
+</div>
+
+    <input type ="button" class="SEVE_B" id="SAVE_BUTTON" value ="Adatok mentése és újraindítás!"
+           onclick="SAVE_WIFI_DATA();"/> 
+    <br>
+    <input type ="button" class="ONLY_R" value ="Újraindítás mentés nélkül." 
+           onclick="ONLY_RESET();"/>           
+
+    <hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:6px;">
+    <h3> >>> OTT <<< </h3>
      
 <script src="wifi.js"></script>
 </body>

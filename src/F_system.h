@@ -31,6 +31,109 @@ uint32_t sntp_update_delay_MS_rfc_not_less_than_15000() {
   return 4 * 60 * 60 * 1000UL;               // 4 hours 
   }                            
 
+// ** Initialize WiFi **************************************************
+bool initWiFi() {
+  W_T_OUT = 0;
+  
+  if (wifi_pref_mode == 0) WIFI_STA_or_AP = 0;   // 0->AP-mód
+  else WIFI_STA_or_AP = 1;                       // 1->STA mód(client) 
+
+  Serial.print(F("- initWiFi(), ssid: "));
+  Serial.println(ssid);
+  Serial.print(F("- initWiFi(), pass: "));
+  Serial.println(pass);
+  Serial.print(F("- initWiFi(), mode: "));
+  Serial.println(WIFI_STA_or_AP);  
+
+  if ((ssid == "") || (pass == "") || (WIFI_STA_or_AP == 0)) {
+    WiFi.disconnect();
+    WIFI_SCAN();
+    WiFi.disconnect();
+    delay(10);    
+    WiFi.softAP(AP_ssid, NULL);      // NULL sets an open Access Point, nincs PW
+    AP_IP = WiFi.softAPIP();
+    Serial.print(F("AP-SSID: "));
+    Serial.print(AP_ssid);
+    Serial.print(F("  AP-IP: "));
+    Serial.println(AP_IP);
+    WIFI_STA_or_AP = 0;
+    return false;
+    }
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid.c_str(), pass.c_str());
+  while ((WiFi.status() != WL_CONNECTED) & (W_T_OUT < 100)) {  // 50mp (100x500=50000)
+    delay(500);
+    Serial.print(".");
+    W_T_OUT++;
+    }
+  Serial.println();
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println(F("- (WiFi.status() != WL_CONNECTED)= FALSE (0), ===> AP (CONFIG) mód!"));
+    WiFi.disconnect();
+    WIFI_SCAN();
+    Serial.println(F("CONFIG (AP) mód!"));
+    WiFi.disconnect();
+    delay(10);
+    WiFi.softAP(AP_ssid, NULL);      // NULL sets an open Access Point, nincs PW
+    AP_IP = WiFi.softAPIP();
+    Serial.print(F("AP-SSID: "));
+    Serial.print(AP_ssid);
+    Serial.print(F("  AP-IP: "));
+    Serial.println(AP_IP);    
+    WIFI_STA_or_AP = 0;
+    return false;
+    }
+  else {
+    WIFI_STA_or_AP = 1;
+    STA_IP = WiFi.localIP();
+    Serial.print(F(" * * * WiFi connected: "));
+    Serial.println(WiFi.SSID());
+    Serial.print(F(" * * * WiFi local IP:  "));
+    Serial.println(WiFi.localIP());        
+    return true;
+    }
+  }
+// ** Scan WiFi network ************************************************
+void WIFI_SCAN() {
+  if (S_DEBUG)Serial.println(F("*** WIFI SCAN () ***"));
+  WIFI_drb_int = WiFi.scanNetworks(false, false);
+  if (S_DEBUG) {
+    if (S_DEBUG)Serial.print(F("Talalt WIFI halozatok szama: "));
+    if (S_DEBUG)Serial.println(WIFI_drb_int);
+    }
+
+  if (WIFI_drb_int == 0) {
+    return;
+    }
+  else {
+    int indices[WIFI_drb_int];      // sort by RSSI
+    int skip[WIFI_drb_int];
+    for (int i = 0; i < WIFI_drb_int; i++) {
+      indices[i] = i;
+      }
+    for (int i = 0; i < WIFI_drb_int; i++) {
+      for (int j = i + 1; j < WIFI_drb_int; j++) {
+        if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+          std::swap(indices[i], indices[j]);
+          std::swap(skip[i], skip[j]);
+          }
+        }
+      }
+
+    if (WIFI_drb_int > 8){  // max 8 db hálózat (weboldal miatt)
+      WIFI_drb_int = 8;
+    }  
+    for (int i = 0; i < WIFI_drb_int; ++i) {
+      if (indices[i] != -1) {
+        RSSI_sort_int[i] = WiFi.RSSI(indices[i]);
+        if (S_DEBUG)Serial.println(WiFi.RSSI(indices[i]));
+        SSID_sort_string[i] = String(WiFi.SSID(indices[i]));
+        if (S_DEBUG)Serial.println(WiFi.SSID(indices[i]));
+        }
+      }
+    }
+  }
+
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
@@ -101,119 +204,6 @@ void _transferCallback(FtpTransferOperation ftpOperation, const char* name, unsi
     Serial.print(" ");
     Serial.println(transferredSize);};
     
-// ------ IP check easyddns -------------------------------------
-void WAN_IP_CHECK_easyddns(byte IP_teszt){    // IP_teszt: 0-NoIp update(ha kell) 1-csak teszt 
-        if(S_DEBUG)Serial.println(F("WAN_IP_CHECK_easyddns()"));
-
-        HTTPClient http;
-        http.setTimeout(1000);   // http válasz timeout: 1000 ms
-        http.begin(client, "http://ifconfig.me/ip");                
-        httpCode = http.GET();
-        WAN_S = String(httpCode); 
-      if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK) {
-          answer_OK_byte = 1;
-          String incoming = http.getString();          
-          WAN_most_IP.fromString(incoming.c_str());
-          }}        
-      else {
-          answer_OK_byte = 0;
-          if(S_DEBUG)Serial.print(F("Error code: "));
-          if(S_DEBUG)Serial.println(httpCode);}
-      http.end();
-      client.flush();
-      if(S_DEBUG)Serial.print(F("httpCode: "));
-      if(S_DEBUG)Serial.println(httpCode);
-      if(S_DEBUG)Serial.print(F("válasz, WAN_most_IP: "));
-      if(S_DEBUG)Serial.println(WAN_most_IP);
-      
-      if ((WAN_most_IP != WAN_new_IP)&(answer_OK_byte == 1)){
-        if(S_DEBUG)Serial.print(F("WAN_new_IP (start): "));
-        if(S_DEBUG)Serial.println(WAN_new_IP);
-        
-        WAN_old_IP = WAN_new_IP;
-        WAN_new_IP = WAN_most_IP; 
-        
-        if(S_DEBUG)Serial.println(F("IP cím megváltozott!"));
-        if(S_DEBUG)Serial.print(F("WAN_most_IP: "));
-        if(S_DEBUG)Serial.println(WAN_most_IP);
-        if(S_DEBUG)Serial.print(F("WAN_new_IP (end): "));
-        if(S_DEBUG)Serial.println(WAN_new_IP);       
-        writeString(114, WAN_new_IP.toString());
-        answer_OK_byte = 0;
-      if(IP_teszt == 0){  
-        NO_IP_update();}
-        }
-      else{
-        if(S_DEBUG)Serial.println(F("IP cím nem változott!"));
-        if(S_DEBUG)Serial.print(F("WAN_most_IP: "));
-        if(S_DEBUG)Serial.println(WAN_most_IP);
-        if(S_DEBUG)Serial.print(F("WAN_new_IP: "));
-        if(S_DEBUG)Serial.println(WAN_new_IP);}
-      WAN_T = DATE_STRING + "  |  " + TIME_STRING;
-      ws.textAll("21"+WAN_T);       // IP cím lekérdezés ideje
-      ws.textAll("22"+WAN_S);       // IP cím lekérdezés válasza http kódja
-      }
-// ------ IP check no-ip api -------------------------------------
-void WAN_IP_CHECK_noip(){
-        if(S_DEBUG)Serial.println(F("WAN_IP_CHECK_noip()"));
-        HTTPClient http;
-        http.setTimeout(1000);   // http válasz timeout: 1000 ms
-        http.begin(client, "http://ip1.dynupdate.no-ip.com");                
-        httpCode = http.GET();
-      if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK) {
-          String incoming = http.getString();          
-          WAN_new_IP.fromString(incoming.c_str());
-          }}        
-      else {
-          if(S_DEBUG)Serial.print(F("Error code: "));
-          if(S_DEBUG)Serial.println(httpCode);}
-      http.end();
-      client.flush();
-      if(S_DEBUG)Serial.print(F("httpCode: "));
-      if(S_DEBUG)Serial.println(httpCode);
-      if(S_DEBUG)Serial.print(F("válasz, WAN_new_IP: "));
-      if(S_DEBUG)Serial.println(WAN_new_IP);}
-//---------- NO-IP frissítés ---------------------------
-void NO_IP_update(){
-        if(S_DEBUG)Serial.println(F("NO-IP frissítés()"));
-        update_url = "";
-        update_url = "http://"; 
-        update_url += DDNS_USER;
-        update_url += ":"; 
-        update_url += DDNS_PASSW; 
-        update_url += "@dynupdate.no-ip.com/nic/update?hostname=";
-        update_url += DDNS_DOMAIN; 
-        update_url += "&myip="; 
-        update_url += WAN_new_IP.toString();
-
-        if(S_DEBUG)Serial.println(F("update_url: "));
-        if(S_DEBUG)Serial.println(update_url);
-
-        HTTPClient http;
-        http.setTimeout(8000);         // http válasz timeout: 8000 ms
-        http.begin(client, update_url);                 
-        httpCode = http.GET();         // Send HTTP GET request     
-
-        if (httpCode == 200) {
-          if(S_DEBUG)Serial.print(F("HTTP Response code: "));
-          if(S_DEBUG)Serial.println(httpCode);
-          noip_answer = http.getString();}
-        else{
-          if(S_DEBUG)Serial.print(F("Error code: "));
-          if(S_DEBUG)Serial.println(httpCode);
-          noip_answer = "ERROR: "+String(httpCode);}          
-        http.end();
-        client.flush();
-        if(S_DEBUG)Serial.print(F("httpCode: "));
-        if(S_DEBUG)Serial.println(httpCode);
-        if(S_DEBUG)Serial.println(F("válasz: "));
-        if(S_DEBUG)Serial.println(noip_answer);
-        LAST_IP_CHANGED = DATE_STRING + "  |  " + TIME_STRING;
-        ws.textAll("23"+LAST_IP_CHANGED);       // NO-IP lekérdezés ideje
-        ws.textAll("24"+noip_answer);           // NO-IP válasz 
-        }  
 //-------- egyéb hőmérsékletek -----------------------------             
 void tempek(byte mit){                      
   // mit=0-semmi, 
@@ -331,10 +321,9 @@ void tempek(byte mit){
     }
   }
 
-
 // --- callback, NTP frissítéskor kerül meghívásra --------------------------
 void NTP_time_is_set() {          
-  WEB_action_b = 11;
+  WEB_action_b = 13;
   WEB_delay_ul = millis();
   if(S_DEBUG){
     Serial.println();
@@ -400,95 +389,66 @@ uint64_t millis64() {
     if (new_low32 < low32) high32++;
     low32 = new_low32;          
     return (uint64_t) high32 << 32 | low32;} 
-// --- 3 bájt írása EEPROM-ba a, b, c, címekre -------------------------------
-void EE_write_3byte (int a, int b, int c, int value){      // 3 bájt max: 16.777.215 perc ==> 11.650 nap, kb.:31 év
-      EEPROM.write(c,(value >> 16) & 0xFF);
-      EEPROM.write(b,(value >> 8) & 0xFF);
-      EEPROM.write(a, value & 0xFF);
-      EEPROM.commit();}         
-// --- 3 bájt olvasása EEPROM-ból a, b, c, címekről --------------------------
-int EE_read_3byte (int a, int b, int c){
-    int value = (EEPROM.read(c) <<  16) +
-                (EEPROM.read(b) <<  8) +
-                (EEPROM.read(a));
-                 return value;} 
-// --- 2 bájt írása EEPROM-ba a, b, címekre ----------------------------------
-void EE_write_2byte (int a, int b, int value){
-      EEPROM.write(b,(value >> 8) & 0xFF);
-      EEPROM.write(a, value & 0xFF);                      
-      EEPROM.commit();
-      }      
-// --- 2 bájt olvasása EEPROM-ból a, b, címekről -----------------------------
-int EE_read_2byte (int a, int b){
-    int value = (EEPROM.read(b) <<  8) +
-                (EEPROM.read(a));
-                 return value;} 
-// ---------------------------------------------------------------------------
-void writeString(int add,String data) {  // karakterlánc beírása EEPROM-ba "add" címre
-    int _size = data.length();
-    int i;
-  for(i=0;i<_size;i++)           {
-    EEPROM.write(add+i,data[i]); }       // bájtok feltöltése a karakterekkel, kezdő (add) címtől karakterlánc hossz végéig
-    EEPROM.write(add+_size,'\0');        // záró '\0' karakter
-    EEPROM.commit();               }
-// ---------------------------------------------------------------------------
-String read_String(int add) {           // karakterlánc kiolvasása EEPROM-ból "add" címtől
-    char data[50];                      // Max 50 Bytes
-    int len=0;
-    int k;
-    k=EEPROM.read(add);
-  while(k != '\0' && len<30) {          // kiolvasás null character-ig    
-    k=EEPROM.read(add+len);
-    data[len]=k;
-    len++;                    }
-  data[len]='\0';
-  return String(data);        }  
-// ----------------------------------------------------------------------------- 
-void EEPROM_clear (){
-    for (int i = 1; i < 240; i++){     // EEPROM terület törlése, 1-től, 239-ig
-          EEPROM.write(i, 0);          // összes cím feltöltése 0-val
-          delay (20);}                            
-    EEPROM.write(239, 100);   // Teszt bájt      
-    EEPROM.commit();
-    ws.textAll("30");        
-    //events.send(String ("1").c_str(), "EE_STATUS", 1000);
-    EEPROM_read ();}      
-// -----------------------------------------------------------------------------
-void EEPROM_read (){             // Induláskor az összes EEPROM adat kiolvasása             
-    make_log = EEPROM.read(1);       
-    S_DEBUG = EEPROM.read(2); 
-    blue_led = EEPROM.read(3);
-    E_cim = read_String(4);
-    E_http = read_String(44);
 
-    DDNS_DOMAIN = read_String(84);
-    WAN_new_IP.fromString(read_String (114));
-    WAN_IP_CHECK_TIME = EE_read_2byte (132, 133);
-    DDNS_ON = EEPROM.read(134);
-        
-    allrun_perc_int = EE_read_3byte (240, 241, 242);  // teljes futásidő beolvasása EEPROM-ból
-    proc_restart_num = EE_read_3byte (243, 244, 245);
-    proc_restart_num++;
-    EE_write_3byte (243, 244, 245, proc_restart_num);
-
-    Serial.print(F("allrun_perc_int, kiolvasása EEPROM-ból: "));
-    Serial.println(allrun_perc_int);     
-    if(S_DEBUG)Serial.println();
-    if(S_DEBUG)Serial.println(F("EEPROM READ OK!")); 
-    }                                        
-// ------------------------------------------------------------------------------
-
-void WS_send_10mp() {
-  // DynamicJsonDocument WS_send(384);
-  // JsonArray data = WS_send.createNestedArray("data");
-  // data.add(TIME_STRING);              // [0]  
-  // data.add(DATE_STRING);              // [1]
-  // data.add(DAYNAME);                  // [2]
-  // data.add(ESP.getChipId());          // [3]
-  // data.add(proc_restart);             // [4] 
-  // char buffer[256];
-  // //size_t len = serializeJson(WS_send, buffer);
-  // //ws.textAll(buffer, len);
-  // ws.textAll("01"+String(buffer));
-  ws.textAll("01"+TIME_STRING);
+String wifi_status_to_string(int w_status) {
+  String WL_ST_String;
+  switch (w_status) {
+    case 255:
+      WL_ST_String = "WL_NO_SHIELD";
+      break;
+    case 0:
+      WL_ST_String = "WL_IDLE_STATUS";
+      break;
+    case 1:
+      WL_ST_String = "WL_NO_SSID_AVAIL";
+      break;
+    case 2:
+      WL_ST_String = "WL_SCAN_COMPLETED";
+      break;
+    case 3:
+      WL_ST_String = "WL_CONNECTED";
+      break;
+    case 4:
+      WL_ST_String = "WL_CONNECT_FAILED";
+      break;
+    case 5:
+      WL_ST_String = "WL_CONNECTION_LOST";
+      break;
+    case 6:
+      WL_ST_String = "WL_WRONG_PASSWORD";
+      break;
+    case 7:
+      WL_ST_String = "WL_DISCONNECTED";
+      break;
+    default: 
+      break;
+    }
+    return WL_ST_String;
   }
+  
+    // WiFi.getMode() =  // 0=WIFI_OFF,  1=WIFI_STA,  2=WIFI_AP,  3=WIFI_AP_STA  
+String wifi_mode_to_string(int w_mode) {
+  String WiFi_mode_String;
+  switch (w_mode) {
+    case 0:
+      WiFi_mode_String = "WIFI_OFF";
+      break;
+    case 1:
+      WiFi_mode_String = "WIFI_STA";
+      break;
+    case 2:
+      WiFi_mode_String = "WIFI_AP";
+      break;
+    case 3:
+      WiFi_mode_String = "WIFI_AP_STA";
+      break;
+    case 4:
+      WiFi_mode_String = "ismeretlen";
+      break;
+    default: 
+      break;
+    }
+    return WiFi_mode_String;
+  }  
+
+                      
