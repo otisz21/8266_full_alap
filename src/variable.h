@@ -7,10 +7,6 @@
 // --- verziószámok, dátumok,------------------------- 
 String comp_idopont;     //ESP Szoftver fordításának ideje (automatikusan kapja meg)
 
-String mai_filename;
-String year_sum_file;
-String log_file_name;
-
 // ******* FIX adatok ****************************
 String project = "8266_full_alap";
 const char* mdns_name = "8266_full_alap";
@@ -19,8 +15,6 @@ const char* AP_ssid = "full_alap_CONFIG";
 // ------ WIFI -----------------------------------
 String ssid;
 String pass;
-IPAddress AP_IP;
-IPAddress STA_IP;
 
 int TCP_PORT = 80;
 
@@ -75,6 +69,10 @@ bool blue_led;
 bool led_state;
 byte log_egyszer = 1;
 
+String mai_filename;
+String year_sum_file;
+String log_file_name;
+
 //*** WIFI - WEB, futásidő ******************
 int httpResponseCode;
 String payload; 
@@ -85,14 +83,13 @@ String E_http;
 byte run_save_egyszer;
 unsigned long WEB_delay_ul;   // késleltetésekhez loop-ban
 byte WEB_action_b = 0;        // webről érkező kérések, loopban végrehajtásához
-                              // 0-semmi, 1-button_1, ... 6-button_6, 10-RESET
-bool BME280_OK;
+String W_S_rec_str;
+int W_S_rec_int = 500;
 byte S_deb_valt = 10;
 
 // --- SD kártya --------------------------------------
 byte SD_status;
 String SD_type;
-String SD_fat;
 uint32_t SD_size;
 uint32_t SD_used_size;
 uint32_t SD_totalBytes;

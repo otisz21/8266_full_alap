@@ -49,22 +49,24 @@
 <label class="label_1" style="color:red; ">Ebben a programban nincs DDNS! </label>
 <hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:10px;">   
  
+<div class="hyp_w_alap">&nbsp
+  <div class="first_w_alap">Time :</div>
+  <div class="second_w_alap"><span id="TIME">TIME</span></div>
+</div>
 
+<div class="hyp_w_alap">&nbsp
+  <div class="first_w_alap">Date :</div>
+  <div class="second_w_alap"><span id="DATE">DATE</span></div>
+</div>
 
- <div class="hyp">&nbsp
-        <div class="first" style="font-weight:normal;">WAN old IP :</div>
-        <div class="second"><span id='WAN_IP_OLD'>255.255.255.255</span></div>
-      </div>
-      
-      <div class="hyp">&nbsp
-        <div class="first" style="font-weight:bold;">WAN new IP :</div>
-        <div class="second"><span id='WAN_IP_NEW'>255.255.255.255</span></div>
-      </div>    
-    
-<h2 style="padding-top:6px; font-weight: normal;">Utolsó frissítés ideje:</h2>
-<h2> <span style="font-size:22px" id='LAST_UDP'>XXXX. xx. xx., yy:yy:yy</span></h2>    
+<div class="hyp_w_alap">&nbsp
+  <div class="first_w_alap">Dow :</div>
+  <div class="second_w_alap"><span id="DOW">DOW</span></div>
+</div>   
 
-<label class="label_2" >NO-IP válasz:</label>
+ 
+
+<label class="label_2" >válasz:</label>
 <textarea id="OUTPUT" style="width:200px; height:40px; margin-top:8px;" ></textarea>
 
 <button onclick="NO_IP_update()" id="NO_IP_UPDATE" class="myButton_ddns"
@@ -76,19 +78,17 @@
       
 
     <input type="text"  class="text_ddns" id="DDNS_DOMAIN" name="DDNS_input" 
-    maxlength="30" oninput="valtozas ();" value="" />
-
-<h4>Felhasználó név, jelszó, forrásfájlban megadva.</h4>     
+    maxlength="30" oninput="valtozas ();" value="" />  
 
 </div> 
          
-<button onclick="DDNS_save()" id="DDNS_SAVE" class="myButton_log"
+<button onclick="DDNS_save()" id="DDNS_SAVE" class="myButton"
         style="background-color:lightgray; margin-top:12px;
         color: white; width:60%;">SAVE</button>          
 
 <hr style="height:1px; background-color:black; margin-top:12px; margin-bottom:2px;">     
      <h3> >>> OTT <<< </h3> 
   
-<!-- <script src="ddns.js"></script> -->
+<script src="ddns.js"></script>
 </body>
 </html>

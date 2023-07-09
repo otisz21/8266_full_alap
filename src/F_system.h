@@ -2,31 +2,33 @@
 //******* Függvények **************************************
 // ********************************************************
 
-void PROJECT_INFO (){
-// ****** forrásfájl és fordítás ideje (megfelelő formátumban) **********************************
-    String date = String (compile_date);
-    String comp_ev = date.substring(7,11);
-    String comp_hnap = date.substring(0,3);
-    String comp_nap = date.substring(4,6);
-    String comp_ido = String (compile_time);
-    comp_idopont = comp_ev +"-"+ comp_hnap +"-"+ comp_nap +"  "+ comp_ido; // Stringként a fordítás időpontja  
-// ********************************************************************************************** 
-    Serial.println();      
-    Serial.println(F("*************** PROJECT INFO ****************"));
-    Serial.println(F("     project:"));
-    Serial.print(F("     "));
-    Serial.println(project);
-    Serial.println();
-    Serial.println(F("     fordítás időpontja:"));
-    Serial.print(F("     "));  
-    Serial.println(comp_idopont); 
-    Serial.println();
-    Serial.println(F("     Alaplap (fordítóban beállított): "));
-    Serial.print(F("     ")); 
-    Serial.println(ARDUINO_BOARD);
-    Serial.println(F("*********************************************")); 
-    Serial.println();}
+void PROJECT_INFO() {
+  // ****** forrásfájl és fordítás ideje (megfelelő formátumban) **********************************
+  String date = String(compile_date);
+  String comp_ev = date.substring(7, 11);
+  String comp_hnap = date.substring(0, 3);
+  String comp_nap = date.substring(4, 6);
+  String comp_ido = String(compile_time);
+  comp_idopont = comp_ev + "-" + comp_hnap + "-" + comp_nap + "  " + comp_ido; // Stringként a fordítás időpontja  
+  // ********************************************************************************************** 
+  Serial.println();
+  Serial.println(F("*************** PROJECT INFO ****************"));
+  Serial.println(F("     project:"));
+  Serial.print(F("     "));
+  Serial.println(project);
+  Serial.println();
+  Serial.println(F("     fordítás időpontja:"));
+  Serial.print(F("     "));
+  Serial.println(comp_idopont);
+  Serial.println();
+  Serial.println(F("     Alaplap (fordítóban beállított): "));
+  Serial.print(F("     "));
+  Serial.println(ARDUINO_BOARD);
+  Serial.println(F("*********************************************"));
+  Serial.println();
+  }
 
+// --- NTP frissítések időköze (4 óra) --------------------------
 uint32_t sntp_update_delay_MS_rfc_not_less_than_15000() {
   return 4 * 60 * 60 * 1000UL;               // 4 hours 
   }                            
@@ -51,11 +53,10 @@ bool initWiFi() {
     WiFi.disconnect();
     delay(10);    
     WiFi.softAP(AP_ssid, NULL);      // NULL sets an open Access Point, nincs PW
-    AP_IP = WiFi.softAPIP();
     Serial.print(F("AP-SSID: "));
     Serial.print(AP_ssid);
     Serial.print(F("  AP-IP: "));
-    Serial.println(AP_IP);
+    Serial.println(WiFi.softAPIP());
     WIFI_STA_or_AP = 0;
     return false;
     }
@@ -75,21 +76,20 @@ bool initWiFi() {
     WiFi.disconnect();
     delay(10);
     WiFi.softAP(AP_ssid, NULL);      // NULL sets an open Access Point, nincs PW
-    AP_IP = WiFi.softAPIP();
     Serial.print(F("AP-SSID: "));
     Serial.print(AP_ssid);
     Serial.print(F("  AP-IP: "));
-    Serial.println(AP_IP);    
+    Serial.println(WiFi.softAPIP());    
     WIFI_STA_or_AP = 0;
     return false;
     }
   else {
     WIFI_STA_or_AP = 1;
-    STA_IP = WiFi.localIP();
-    Serial.print(F(" * * * WiFi connected: "));
-    Serial.println(WiFi.SSID());
-    Serial.print(F(" * * * WiFi local IP:  "));
-    Serial.println(WiFi.localIP());        
+    Serial.println('\n');
+    Serial.print(" * * * WiFi connected:\t ");
+    Serial.println(WiFi.SSID());          // Melyik hálózathoz csatlakozunk
+    Serial.print(" * * * WiFi local IP :\t");
+    Serial.println(WiFi.localIP());       // ESP8266 IP-címe    
     return true;
     }
   }
@@ -134,19 +134,9 @@ void WIFI_SCAN() {
     }
   }
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-    data[len] = 0;
-    String W_S_rec = "";
-    for (unsigned int i=0; i < len; i++) W_S_rec += ((char) data[i]);
-    Serial.println("W_S_rec: " + W_S_rec);
-    if (W_S_rec == "10") proc_restart = 10;    // proc restart törlése
-  }
-}    
-
-void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-             void *arg, uint8_t *data, size_t len) {
+// Web Socket esemény ---------------------------------------------------------------
+void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type,
+  void* arg, uint8_t* data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
@@ -166,161 +156,65 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       break;
     case WS_EVT_ERROR:
       Serial.println("switch (type) --> WS_EVT_ERROR");
-      break;}
-}
-
-void _callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace){
-    Serial.print(F(">>>>>>>>>>>>>>> _callback " ));
-    Serial.print(ftpOperation);
-    // FTP_CONNECT,
-    // FTP_DISCONNECT,
-    // FTP_FREE_SPACE_CHANGE
-    Serial.print(" ");
-    Serial.print(freeSpace);
-    Serial.print(" ");
-    Serial.println(totalSpace);  
-    // freeSpace : totalSpace = x : 360  
-    if (ftpOperation == FTP_CONNECT) Serial.println(F("CONNECTED"));
-    if (ftpOperation == FTP_DISCONNECT) Serial.println(F("DISCONNECTED"));};    
-void _transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize){
-    Serial.print(F(">>>>>>>>>>>>>>> _transferCallback " ));
-    Serial.print(ftpOperation);
-    /* FTP_UPLOAD_START = 0,
-     * FTP_UPLOAD = 1,
-     *
-     * FTP_DOWNLOAD_START = 2,
-     * FTP_DOWNLOAD = 3,
-     *
-     * FTP_TRANSFER_STOP = 4,
-     * FTP_DOWNLOAD_STOP = 4,
-     * FTP_UPLOAD_STOP = 4,
-     *
-     * FTP_TRANSFER_ERROR = 5,
-     * FTP_DOWNLOAD_ERROR = 5,
-     * FTP_UPLOAD_ERROR = 5
-     */
-    Serial.print(" ");
-    Serial.print(name);
-    Serial.print(" ");
-    Serial.println(transferredSize);};
-    
-//-------- egyéb hőmérsékletek -----------------------------             
-void tempek(byte mit){                      
-  // mit=0-semmi, 
-  // mit=2-szekrény- http://192.168.0.97:80/skaf
-  // mit=3-konyha  - http://192.168.0.67:43101/ora
-  // mit=4-nappali - http://192.168.0.102:8080/temp_hum
-  // mit=5-háló    - http://192.168.0.61:43130/bedroom
-  // mit=6-egyéni lekérdezés - pl.: SSR relay: http://192.168.0.90:43125/ssr
-                          // - pl.: DCF77 gen.: http://192.168.0.80/skaf  
-  // mit=10        - összes lekérdezése
-                                                               
-  if(S_DEBUG)Serial.print(F("Sync tempek, mit?: "));
-  if(S_DEBUG)Serial.println(mit);
-
-  HTTPClient http;
-  
-//-------- DCF77 (szekrény) hőmérséklet ------------------------------
-    if((mit == 2)||(mit == 10)){      
-        http.begin(client, "http://192.168.0.80/skaf");                
-        httpResponseCode = http.GET();    // Send HTTP GET request       
-        payload = "--";        
-    if (httpResponseCode == 200) {
-      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      payload = http.getString();
-      ws.textAll("11"+payload);
-      }
-    else {
-      if (S_DEBUG)Serial.print(F("Error code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      ws.textAll("11"+String(httpResponseCode));
-      }
-    http.end();
-    if (S_DEBUG)Serial.println(payload);
-    }
-
-  //-------- étkezó hőmérséklet ------------------------------
-  if ((mit == 3) || (mit == 10)) {
-    http.begin(client, "http://192.168.0.67:43101/ora");
-    httpResponseCode = http.GET();    // Send HTTP GET request       
-    payload = "--";
-    if (httpResponseCode == 200) {
-      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      payload = http.getString();
-      ws.textAll("12"+payload);
-      }
-    else {
-      if (S_DEBUG)Serial.print(F("Error code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      ws.textAll("12"+String(httpResponseCode));
-      }
-    http.end();
-    if (S_DEBUG)Serial.println(payload);
-    }     
-
-  //------- nappali hőmérséklet (LED-MATRIX clock) -------------
-  if ((mit == 4) || (mit == 10)) {
-    http.begin(client, "http://192.168.0.102:8080/temp_hum");
-    httpResponseCode = http.GET();    // Send HTTP POST request       
-    payload = "--";
-    if (httpResponseCode == 200) {
-      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      payload = http.getString();
-      ws.textAll("13"+payload);
-      }
-    else {
-      if (S_DEBUG)Serial.print(F("Error code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      ws.textAll("13"+String(httpResponseCode));
-      }
-    http.end();
-    if (S_DEBUG)Serial.println(payload);
-    }
-
-  //---------- hálószoba hőmérséklet ---------------------------
-  if ((mit == 5) || (mit == 10)) {
-    http.begin(client, "http://192.168.0.61:43130/bedroom");
-    httpResponseCode = http.GET();    // Send HTTP POST request       
-    payload = "--";
-    if (httpResponseCode == 200) {
-      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      payload = http.getString();
-      ws.textAll("14"+payload);
-      }
-    else {
-      if (S_DEBUG)Serial.print(F("Error code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      ws.textAll("14"+String(httpResponseCode));
-      }
-    http.end();
-    if (S_DEBUG)Serial.println(payload);
-    }
-
-  //---------- egyéni lekérdezés ---------------------------
-  if ((mit == 6) || (mit == 10)) {
-    http.begin(client, "http://" + E_http);
-    int httpResponseCode = http.GET();    // Send HTTP POST request       
-    String payload = "--";
-    if (httpResponseCode == 200) {
-      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      payload = http.getString();
-      ws.textAll("15"+payload);
-      }
-    else {
-      if (S_DEBUG)Serial.print(F("Error code: "));
-      if (S_DEBUG)Serial.println(httpResponseCode);
-      ws.textAll("15"+String(httpResponseCode));
-      }
-    http.end();
-    if (S_DEBUG)Serial.println(payload);
+      break;
     }
   }
 
+// Web Socket, ha adat érkrzik Clienstől -------------------------------------------------
+void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
+  AwsFrameInfo* info = (AwsFrameInfo*)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    W_S_rec_str = "";
+    for (unsigned int i = 0; i < len; i++) W_S_rec_str += ((char)data[i]);
+    W_S_rec_int = W_S_rec_str.toInt();
+    if (S_DEBUG) Serial.print(F("W_S_rec_str: "));
+    if (S_DEBUG) Serial.println(W_S_rec_str);
+    if (S_DEBUG) Serial.print(F("W_S_rec_int: "));
+    if (S_DEBUG) Serial.println(W_S_rec_int);
+    }
+  }
+
+// ------ Simple FTP server callback -------------------------------------------------------
+void _callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace) {
+  Serial.print(F(">>>>>>>>>>>>>>> _callback "));
+  Serial.print(ftpOperation);
+  // FTP_CONNECT,
+  // FTP_DISCONNECT,
+  // FTP_FREE_SPACE_CHANGE
+  Serial.print(" ");
+  Serial.print(freeSpace);
+  Serial.print(" ");
+  Serial.println(totalSpace);
+  // freeSpace : totalSpace = x : 360  
+  if (ftpOperation == FTP_CONNECT) Serial.println(F("CONNECTED"));
+  if (ftpOperation == FTP_DISCONNECT) Serial.println(F("DISCONNECTED"));
+  }
+
+// ------ Simple FTP server callback -------------------------------------------------------
+void _transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize) {
+  Serial.print(F(">>>>>>>>>>>>>>> _transferCallback "));
+  Serial.print(ftpOperation);
+  /* FTP_UPLOAD_START = 0,
+   * FTP_UPLOAD = 1,
+   *
+   * FTP_DOWNLOAD_START = 2,
+   * FTP_DOWNLOAD = 3,
+   *
+   * FTP_TRANSFER_STOP = 4,
+   * FTP_DOWNLOAD_STOP = 4,
+   * FTP_UPLOAD_STOP = 4,
+   *
+   * FTP_TRANSFER_ERROR = 5,
+   * FTP_DOWNLOAD_ERROR = 5,
+   * FTP_UPLOAD_ERROR = 5
+   */
+  Serial.print(" ");
+  Serial.print(name);
+  Serial.print(" ");
+  Serial.println(transferredSize);
+  }
+    
 // --- callback, NTP frissítéskor kerül meghívásra --------------------------
 void NTP_time_is_set() {          
   WEB_action_b = 13;
@@ -367,28 +261,31 @@ void showTime() {
   N_EPO = time_t(now);
   DAYNAME = DOW_ARRY[timeinfo.tm_wday];
   sprintf(AKT_IDO_CHAR_10, "%02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+
   // AKT_IDO_CHAR_10: [0][1][2][3][4][5][6][7][8][9]
   //             pl.:  1  4  :  2  5  :  3  2  -  -
+  //-----------------------------------------------------------
+  // char.  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, .. 0, 1, ....
+  // byte  48, 49, 50, 51, 52, 53, 54, 55, 56, 57,              
 
-  mp_x_dik = AKT_IDO_CHAR_10[7];    // char.  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, .. 0, 1, ....
-                                    // byte  48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
-  perc_x_dik = AKT_IDO_CHAR_10[4];  // char.  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, .. 0, 1, ....
-                                    // byte  48, 49, 50, 51, 52, 53, 54, 55, 56, 57,                                
+  mp_x_dik = AKT_IDO_CHAR_10[7];
+  perc_x_dik = AKT_IDO_CHAR_10[4];
   }
 // ---------------------------------------------------------------------------
-String first_0 (int adat){        // 9:2 ==> 09:02
-    if (adat<10){
-     vissza = "0" + String(adat);}
-    else{
-      vissza = String(adat);} 
-    return vissza;}
+String first_0(int adat) {        // 9:2 ==> 09:02
+  if (adat < 10) vissza = "0" + String(adat);
+  else vissza = String(adat);
+  return vissza;
+  }
+
 // ---  futásidő, millis() túlcsordulás miatt 64 biten ------------------------
-uint64_t millis64() {             
-    static uint32_t low32, high32;
-    uint32_t new_low32 = millis();
-    if (new_low32 < low32) high32++;
-    low32 = new_low32;          
-    return (uint64_t) high32 << 32 | low32;} 
+uint64_t millis64() {
+  static uint32_t low32, high32;
+  uint32_t new_low32 = millis();
+  if (new_low32 < low32) high32++;
+  low32 = new_low32;
+  return (uint64_t)high32 << 32 | low32;
+  }
 
 String wifi_status_to_string(int w_status) {
   String WL_ST_String;
@@ -420,13 +317,13 @@ String wifi_status_to_string(int w_status) {
     case 7:
       WL_ST_String = "WL_DISCONNECTED";
       break;
-    default: 
+    default:
       break;
     }
-    return WL_ST_String;
+  return WL_ST_String;
   }
-  
-    // WiFi.getMode() =  // 0=WIFI_OFF,  1=WIFI_STA,  2=WIFI_AP,  3=WIFI_AP_STA  
+
+// WiFi.getMode() =  // 0=WIFI_OFF,  1=WIFI_STA,  2=WIFI_AP,  3=WIFI_AP_STA  
 String wifi_mode_to_string(int w_mode) {
   String WiFi_mode_String;
   switch (w_mode) {
@@ -445,10 +342,125 @@ String wifi_mode_to_string(int w_mode) {
     case 4:
       WiFi_mode_String = "ismeretlen";
       break;
-    default: 
+    default:
       break;
     }
-    return WiFi_mode_String;
-  }  
+  return WiFi_mode_String;
+  }
 
-                      
+//-------- egyéb hőmérsékletek -----------------------------             
+void tempek(byte mit) {
+  // mit=0-semmi, 
+  // mit=2-szekrény- http://192.168.0.97:80/skaf
+  // mit=3-konyha  - http://192.168.0.67:43101/ora
+  // mit=4-nappali - http://192.168.0.102:8080/temp_hum
+  // mit=5-háló    - http://192.168.0.61:43130/bedroom
+  // mit=6-egyéni lekérdezés - pl.: SSR relay: http://192.168.0.90:43125/ssr
+                          // - pl.: DCF77 gen.: http://192.168.0.80/skaf  
+  // mit=10        - összes lekérdezése
+
+  if (S_DEBUG)Serial.print(F("Sync tempek, mit?: "));
+  if (S_DEBUG)Serial.println(mit);
+
+  HTTPClient http;
+
+  //-------- DCF77 (szekrény) hőmérséklet ------------------------------
+  if ((mit == 2) || (mit == 10)) {
+    http.begin(client, "http://192.168.0.80/skaf");
+    httpResponseCode = http.GET();    // Send HTTP GET request       
+    payload = "--";
+    if (httpResponseCode == 200) {
+      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      payload = http.getString();
+      ws.textAll("11" + payload);
+      }
+    else {
+      if (S_DEBUG)Serial.print(F("Error code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      ws.textAll("11" + String(httpResponseCode));
+      }
+    http.end();
+    if (S_DEBUG)Serial.println(payload);
+    }
+
+  //-------- étkezó hőmérséklet ------------------------------
+  if ((mit == 3) || (mit == 10)) {
+    http.begin(client, "http://192.168.0.67:43101/ora");
+    httpResponseCode = http.GET();    // Send HTTP GET request       
+    payload = "--";
+    if (httpResponseCode == 200) {
+      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      payload = http.getString();
+      ws.textAll("12" + payload);
+      }
+    else {
+      if (S_DEBUG)Serial.print(F("Error code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      ws.textAll("12" + String(httpResponseCode));
+      }
+    http.end();
+    if (S_DEBUG)Serial.println(payload);
+    }
+
+  //------- nappali hőmérséklet (LED-MATRIX clock) -------------
+  if ((mit == 4) || (mit == 10)) {
+    http.begin(client, "http://192.168.0.102:8080/temp_hum");
+    httpResponseCode = http.GET();    // Send HTTP POST request       
+    payload = "--";
+    if (httpResponseCode == 200) {
+      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      payload = http.getString();
+      ws.textAll("13" + payload);
+      }
+    else {
+      if (S_DEBUG)Serial.print(F("Error code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      ws.textAll("13" + String(httpResponseCode));
+      }
+    http.end();
+    if (S_DEBUG)Serial.println(payload);
+    }
+
+  //---------- hálószoba hőmérséklet ---------------------------
+  if ((mit == 5) || (mit == 10)) {
+    http.begin(client, "http://192.168.0.61:43130/bedroom");
+    httpResponseCode = http.GET();    // Send HTTP POST request       
+    payload = "--";
+    if (httpResponseCode == 200) {
+      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      payload = http.getString();
+      ws.textAll("14" + payload);
+      }
+    else {
+      if (S_DEBUG)Serial.print(F("Error code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      ws.textAll("14" + String(httpResponseCode));
+      }
+    http.end();
+    if (S_DEBUG)Serial.println(payload);
+    }
+
+  //---------- egyéni lekérdezés ---------------------------
+  if ((mit == 6) || (mit == 10)) {
+    http.begin(client, "http://" + E_http);
+    int httpResponseCode = http.GET();    // Send HTTP POST request       
+    String payload = "--";
+    if (httpResponseCode == 200) {
+      if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      payload = http.getString();
+      ws.textAll("15" + payload);
+      }
+    else {
+      if (S_DEBUG)Serial.print(F("Error code: "));
+      if (S_DEBUG)Serial.println(httpResponseCode);
+      ws.textAll("15" + String(httpResponseCode));
+      }
+    http.end();
+    if (S_DEBUG)Serial.println(payload);
+    }
+  }

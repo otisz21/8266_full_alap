@@ -12,69 +12,70 @@ document.getElementById("BUSY_1").style.visibility = "hidden";
   xhr.send();
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        INFO = JSON.parse(xhr.responseText);
-        console.log(JSON.stringify(INFO, null, '\t'));     // "szépen" kiírt JSON        
+        adatok = JSON.parse(xhr.responseText);
+        console.log(JSON.stringify(adatok, null, '\t'));     // "szépen" kiírt JSON        
 
-        document.getElementById("PROC_0").innerHTML = INFO.proc[0].toFixed(2); // Proc. fesz.
+        document.getElementById("PROC_0").innerHTML = adatok.proc[0].toFixed(2); // Proc. fesz.
         document.getElementById("PROC_1").innerHTML =
-            INFO.proc[1].toLocaleString('en-US').replaceAll(",", " ");   // chip ID
-        document.getElementById("PROC_2").innerHTML = INFO.proc[2];            // Core verzió
-        document.getElementById("PROC_3").innerHTML = INFO.proc[3];            // SDK-verzió
-        document.getElementById("PROC_4").innerHTML = INFO.proc[4];            // CPU frekv. MHz-ben
+            adatok.proc[1].toLocaleString('en-US').replaceAll(",", " ");   // chip ID
+        document.getElementById("PROC_2").innerHTML = adatok.proc[2];            // Core verzió
+        document.getElementById("PROC_3").innerHTML = adatok.proc[3];            // SDK-verzió
+        document.getElementById("PROC_4").innerHTML = adatok.proc[4];            // CPU frekv. MHz-ben
         document.getElementById("PROC_5").innerHTML =                          // Flash chip size
-            INFO.proc[5].toLocaleString('en-US').replaceAll(",", " ");
+            adatok.proc[5].toLocaleString('en-US').replaceAll(",", " ");
         document.getElementById("PROC_6").innerHTML =                          // Flash chip size
-            INFO.proc[6].toLocaleString('en-US').replaceAll(",", " ");
+            adatok.proc[6].toLocaleString('en-US').replaceAll(",", " ");
         //--------------------------------------------          
         document.getElementById("PROC_7").innerHTML =
-            INFO.proc[7].toLocaleString('en-US').replaceAll(",", " ");   // flash chip ID
+            adatok.proc[7].toLocaleString('en-US').replaceAll(",", " ");   // flash chip ID
         document.getElementById("PROC_8").innerHTML =                          // Flash chip size
-            INFO.proc[8].toLocaleString('en-US').replaceAll(",", " ");
-        document.getElementById("PROC_9").innerHTML = INFO.proc[9];            // FLASH chip frekv. MHz-ben
+            adatok.proc[8].toLocaleString('en-US').replaceAll(",", " ");
+        document.getElementById("PROC_9").innerHTML = adatok.proc[9];            // FLASH chip frekv. MHz-ben
         //--------------------------------------------
         document.getElementById("PROC_10").innerHTML =
-            INFO.proc[10].toLocaleString('en-US').replaceAll(",", " ");   // Free Heap, byte
+            adatok.proc[10].toLocaleString('en-US').replaceAll(",", " ");   // Free Heap, byte
         document.getElementById("PROC_11").innerHTML =
-            INFO.proc[11].toLocaleString('en-US').replaceAll(",", " ");   // Heap, max. block size, byte
-        if (INFO.proc[12] > 25) {                                               // HEAP töredezettség %-ban, ha nagyobb mint 25%
-            document.getElementById("PROC_12").innerHTML = " &nbsp " + (INFO.proc[12]).toFixed(2) + " !!! &nbsp";
+            adatok.proc[11].toLocaleString('en-US').replaceAll(",", " ");   // Heap, max. block size, byte
+        if (adatok.proc[12] > 25) {                                               // HEAP töredezettség %-ban, ha nagyobb mint 25%
+            document.getElementById("PROC_12").innerHTML = " &nbsp " + (adatok.proc[12]).toFixed(2) + " !!! &nbsp";
             document.getElementById("PROC_12").style.backgroundColor = "red";
             document.getElementById("PROC_12").style.color = "white";
         }
         else {                                                                  // HEAP töredezettség %-ban, ha kisebb mint 25%
-            document.getElementById("PROC_12").innerHTML = " &nbsp " + (INFO.proc[12]).toFixed(2) + " &nbsp ";
+            document.getElementById("PROC_12").innerHTML = " &nbsp " + (adatok.proc[12]).toFixed(2) + " &nbsp ";
             document.getElementById("PROC_12").style.backgroundColor = "lightgreen";
             document.getElementById("PROC_12").style.color = "black";
         }
         //--------------------------------------------
-        document.getElementById("PROC_13").innerHTML = INFO.proc[13];          // Proc. újraindult, x-szer
-        document.getElementById("X_SZER").value = INFO.proc[13];               //proc. újraindult
-        document.getElementById("PROC_14").innerHTML = INFO.proc[14];          // reset oka
+        document.getElementById("PROC_13").innerHTML = adatok.proc[13];          // Proc. újraindult, x-szer
+        document.getElementById("X_SZER").value = adatok.proc[13];               //proc. újraindult
+        document.getElementById("PROC_14").innerHTML = adatok.proc[14];          // reset oka
         //-----------------------------------------------------------------------------------------------------
-        document.getElementById("PROC_15").innerHTML = INFO.proc[15];          // Filesystem tipusa
+        document.getElementById("PROC_15").innerHTML = adatok.proc[15];          // Filesystem tipusa
         document.getElementById("PROC_16").innerHTML =
-            INFO.proc[16].toLocaleString('en-US').replaceAll(",", " ");   // fs total space
+            adatok.proc[16].toLocaleString('en-US').replaceAll(",", " ");   // fs total space
         document.getElementById("PROC_17").innerHTML =
-            INFO.proc[17].toLocaleString('en-US').replaceAll(",", " ");   // fs used space
-        if (INFO.proc[18] > 75) {                                           // fs used %   ha a foglaltság nagyobb mint 75 %
-            document.getElementById("PROC_18").innerHTML = " &nbsp " + (INFO.proc[18]).toFixed(2) + " !!! &nbsp";
+            adatok.proc[17].toLocaleString('en-US').replaceAll(",", " ");   // fs used space
+        if (adatok.proc[18] > 75) {                                           // fs used %   ha a foglaltság nagyobb mint 75 %
+            document.getElementById("PROC_18").innerHTML = " &nbsp " + (adatok.proc[18]).toFixed(2) + " !!! &nbsp";
             document.getElementById("PROC_18").style.backgroundColor = "red";
             document.getElementById("PROC_18").style.color = "white";
         }
         else {                                                              // fs used %   ha a foglaltság kisebb mint 75 %
-            document.getElementById("PROC_18").innerHTML = " &nbsp " + (INFO.proc[18]).toFixed(2) + " &nbsp ";
+            document.getElementById("PROC_18").innerHTML = " &nbsp " + (adatok.proc[18]).toFixed(2) + " &nbsp ";
             document.getElementById("PROC_18").style.backgroundColor = "lightgreen";
             document.getElementById("PROC_18").style.color = "black";
         }
         //--------------------------------------------
-        document.getElementById("RUN_ALL").value = INFO.proc[19];
-        document.getElementById("RUN_YEAR").value = Math.floor(INFO.proc[19] * 60 / 31536000);
-        document.getElementById("RUN_DAY").value = Math.floor(((INFO.proc[19] * 60 % 31536000) / 86400));
-        document.getElementById("RUN_HOUR").value = Math.floor((((INFO.proc[19] * 60 % 31536000) % 86400) / 3600));
+        document.getElementById("RUN_ALL").value = adatok.proc[19];
+        document.getElementById("RUN_YEAR").value = Math.floor(adatok.proc[19] * 60 / 31536000);
+        document.getElementById("RUN_DAY").value = Math.floor(((adatok.proc[19] * 60 % 31536000) / 86400));
+        document.getElementById("RUN_HOUR").value = Math.floor((((adatok.proc[19] * 60 % 31536000) % 86400) / 3600));
     }
     }
     
   document.getElementById("RUN_OWER_BUTTON").style.background = "gray";
+  document.getElementById("X_SZER_BUTTON").style.background = "gray";
 
 // -------------------------------------------------------------------------  
 function valtozas_1() {       // ha az év, nap, óra mezőkbe írunk

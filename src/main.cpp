@@ -37,6 +37,7 @@ void setup() {
   delay(2000);
   PROJECT_INFO();
 
+//---- mentett adatok kiolvasása--------------------------
   pref.begin("my-app", false);
 
   proc_restart_num = pref.getUInt("counter", 0);
@@ -59,21 +60,14 @@ void setup() {
   pref.putUInt("counter", proc_restart_num);
 
   pref.end();
+//----------------------------------------------------------
 
-  //WiFi.persistent(false);
-  //WiFi.mode(WIFI_STA);
   WiFi.setHostname(project.c_str());
   
   Serial.println("Connecting ...");
-    // ****************************************************************
+// ***** WiFi csatlakozás ***********************************
   if (initWiFi()) Serial.println(F("Setup / if (initWiFi())= TRUE (1), ===> Client mód!"));
   else Serial.println(F("Setup / if (initWiFi())= FALSE(0), ===> AP mód!"));
-
-  Serial.println('\n');
-  Serial.print("Connected to:\t ");
-  Serial.println(WiFi.SSID());          // Melyik hálózathoz csatlakozunk
-  Serial.print("IP address  :\t");
-  Serial.println(WiFi.localIP());       // ESP8266 IP-címe
 
     //   Állítsa be az mDNS válaszadót:
     // - Az első argumentum ebben a példában a domain név
@@ -97,19 +91,17 @@ void setup() {
       ftpSrv.setTransferCallback(_transferCallback);
       filesystem = "LittleFS";
       Serial.println(F("LittleFS fájlrendszer elindítva!"));
-      Serial.print(F("FTP username: "));
-      Serial.println(F("esp8266"));
-      Serial.print(F("FTP pw.: "));
-      Serial.println(F("8266"));
-      Serial.println();
-      ftpSrv.begin("esp8266", "8266");     // username, password for ftp.   
-      }                                   // (default 21, 50009 for PASV) 
+      Serial.print(" * * * FTP username:\t ");
+      Serial.println(F("esp8266"));            // username for ftp.
+      Serial.print(" * * * FTP password:\t");
+      Serial.println(F("8266"));               // password for ftp.
+      ftpSrv.begin("esp8266", "8266");         // (default 21, 50009 for PASV)  
+      }
 
-    configTime(MY_TZ, NTP_SERVER_1, NTP_SERVER_2);  //Mytz - Budapest
-    settimeofday_cb(NTP_time_is_set);          // opcionális: visszahívás, ha elküldték az időt
+    configTime(MY_TZ, NTP_SERVER_1, NTP_SERVER_2); //Mytz - Budapest
+    settimeofday_cb(NTP_time_is_set);              // opcionális: visszahívás, ha elküldték az időt
 
-
-  if (WIFI_STA_or_AP == 1) {                      // wifi hálózat, 1->STA mód(client) 
+  if (WIFI_STA_or_AP == 1) {                       // wifi hálózat, 1->STA mód(client) 
 //**** automatikusan teljesülő kérések ******************************************  
     server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
   }
@@ -123,31 +115,28 @@ void setup() {
     server.on("/index_json", HTTP_GET, [](AsyncWebServerRequest* request) {        // JSON adatok Főoldalra
       AsyncResponseStream* response = request->beginResponseStream("application/json");
       DynamicJsonDocument IR(512);
-      JsonArray data = IR.createNestedArray("data");
-      data.add(TIME_STRING);              // [0]  
-      data.add(DATE_STRING);              // [1]
-      data.add(DAYNAME);                  // [2]
-      data.add(ESP.getChipId());          // [3]
-      data.add(proc_restart);             // [4]
+      JsonArray index = IR.createNestedArray("index");
+      index.add(TIME_STRING);              // [0]  
+      index.add(DATE_STRING);              // [1]
+      index.add(DAYNAME);                  // [2]
+      index.add(ESP.getChipId());          // [3]
+      index.add(proc_restart);             // [4]
       serializeJson(IR, *response);
       request->send(response);});
 
     //**** Info + Setup oldal ********************************************************
-    //------------------------------------------------------------------------------  
     server.on("/setup_json", HTTP_GET, [](AsyncWebServerRequest* request) {
       AsyncResponseStream* response = request->beginResponseStream("application/json");
       DynamicJsonDocument adatok(384);
-      JsonArray data = adatok.createNestedArray("data");
-      data.add("BME280");                   // [0] Senzor indítása OK, vagy ERROR
-      data.add(BME280_OK);                  // [1] Senzor indítása OK, vagy ERROR        
-      data.add(project);                    // [2] project (a file name, csak main.cpp!)
-      data.add(comp_idopont);               // [3] fordítás időpontja
-      data.add(ARDUINO_BOARD);              // [4] modul tipus
-      data.add(millis64());                 // [5] futásidő
-      data.add(allrun_perc_int);            // [6] teljes futásidő
-      data.add(make_log);                   // [7] hogy legyen soros monitor ellenőrzés
-      data.add(S_DEBUG);                    // [8] készítsen-e log fájlt
-      data.add(blue_led);                   // [9] villogjon-e a beépített kék led
+      JsonArray setup = adatok.createNestedArray("setup");      
+      setup.add(project);                    // [0] project (a file name, csak main.cpp!)
+      setup.add(comp_idopont);               // [1] fordítás időpontja
+      setup.add(ARDUINO_BOARD);              // [2] modul tipus
+      setup.add(millis64());                 // [3] futásidő
+      setup.add(allrun_perc_int);            // [4] teljes futásidő
+      setup.add(make_log);                   // [5] hogy legyen soros monitor ellenőrzés
+      setup.add(S_DEBUG);                    // [6] készítsen-e log fájlt
+      setup.add(blue_led);                   // [7] villogjon-e a beépített kék led
       serializeJson(adatok, *response);
       request->send(response);
       });
@@ -163,7 +152,6 @@ void setup() {
       pref.end();
       request->send_P(200, "text/plain", "setup_SAVE_OK");});
 
-//********************************************************************************
 //**** WIFI setup oldal **********************************************************
 //--------------------------------------------------------------------------------
   server.on("/wifi_json", HTTP_GET, [](AsyncWebServerRequest* request) {           // WIFI-Setup oldal JSON adatok küldése
@@ -224,7 +212,7 @@ void setup() {
     if (WIFI_STA_or_AP == 0) {                        // wifi hálózat, 0->AP-mód  
       pref.putBool("wifi_pref_mode", WIFI_STA_or_AP); // AP mód
       }
-    WEB_action_b = 11;        // Reset loop-ban
+    WEB_action_b = 11;                                // Reset loop-ban
     WEB_delay_ul = millis();
     pref.end();
     request->send(200, "text/plain", "Done. ESP will restart, connect to : " + ssid);});
@@ -236,15 +224,15 @@ void setup() {
   server.on("/NTP_json", HTTP_GET, [](AsyncWebServerRequest *request) {         //  NTP setup oldal JSON adatok küldése
       AsyncResponseStream *response = request->beginResponseStream("application/json"); 
       DynamicJsonDocument NTP_adatok(256);
-      JsonArray data = NTP_adatok.createNestedArray("data");                  
-      data.add(TIME_STRING);              // [0] Pontos idő
-      data.add(DATE_STRING);              // [1] Dátum
-      data.add(DAYNAME);                  // [2] nap neve
-      data.add(EPO_STRING);               // [3] epoch time
-      data.add(year_x_day);               // [4] az év x. napja
-      data.add(winter_sommer_time);       // [5] téli vagy nyári időszámytás
-      data.add(NTP_LASTSYNC_STRING);      // [6] az utolsó NTP szinkronizáció ideje
-      data.add(mai_epo);                  // [7] mai nap epoch time-ja 12:00-kor
+      JsonArray ntp = NTP_adatok.createNestedArray("ntp");                  
+      ntp.add(TIME_STRING);              // [0] Pontos idő
+      ntp.add(DATE_STRING);              // [1] Dátum
+      ntp.add(DAYNAME);                  // [2] nap neve
+      ntp.add(EPO_STRING);               // [3] epoch time
+      ntp.add(year_x_day);               // [4] az év x. napja
+      ntp.add(winter_sommer_time);       // [5] téli vagy nyári időszámytás
+      ntp.add(NTP_LASTSYNC_STRING);      // [6] az utolsó NTP szinkronizáció ideje
+      ntp.add(mai_epo);                  // [7] mai nap epoch time-ja 12:00-kor
       serializeJson(NTP_adatok, *response);
       request->send(response);});
 
@@ -253,54 +241,47 @@ void setup() {
   server.on("/ddns_json", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("application/json");
     DynamicJsonDocument DDNS_adatok(512);
-
     JsonArray ddns = DDNS_adatok.createNestedArray("ddns");
     ddns.add(TIME_STRING);          // [0]  
     ddns.add(DATE_STRING);          // [1]
     ddns.add(DAYNAME);              // [2]
-
     serializeJson(DDNS_adatok, *response);
     request->send(response);});
 
 //*********************************************************************************
-//**** EEPROM PAGE ******************************************************
-//-------------------------------------------------------------------------------
-  // server.on("/proc_json", HTTP_GET, [](AsyncWebServerRequest *request) {     // JSON adatok EEPROM és mem.
-  //     request->send(200, "text/plain", CHIP_INFO_8266_json()); });
-
   server.on("/proc_json", HTTP_GET, [](AsyncWebServerRequest* request) {     // JSON adatok EEPROM és mem.
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument PROC_json(512);
-    JsonArray data = PROC_json.createNestedArray("proc");
-    data.add(ESP.getVcc() * 1.12 / 1023.0);         // [0] Proc Vcc  (D1 mininél)
-    data.add(ESP.getChipId());                  // [1] ESP8266 chip ID 
-    data.add(ESP.getCoreVersion());             // [2] alapverzió
-    data.add(ESP.getSdkVersion());              // [3] SDK-verzió
-    data.add(ESP.getCpuFreqMHz());              // [4] CPU frekvenciája MHz-ben
+    JsonArray proc = PROC_json.createNestedArray("proc");
+    proc.add(ESP.getVcc() * 1.12 / 1023.0);         // [0] Proc Vcc  (D1 mininél)
+    proc.add(ESP.getChipId());                  // [1] ESP8266 chip ID 
+    proc.add(ESP.getCoreVersion());             // [2] alapverzió
+    proc.add(ESP.getSdkVersion());              // [3] SDK-verzió
+    proc.add(ESP.getCpuFreqMHz());              // [4] CPU frekvenciája MHz-ben
     //-------------------------------------
-    data.add(ESP.getSketchSize());              // [5] SketchSize, byte
-    data.add(ESP.getFreeSketchSpace());         // [6] FreeSketchSpace, byte
+    proc.add(ESP.getSketchSize());              // [5] SketchSize, byte
+    proc.add(ESP.getFreeSketchSpace());         // [6] FreeSketchSpace, byte
     //-------------------------------------
-    data.add(ESP.getFlashChipId());             // [7] flash chip azonosító
-    data.add(ESP.getFlashChipRealSize());       // [8] Flash chip size
-    data.add(ESP.getFlashChipSpeed() / 1000000);  // [9] Flash chip frekvenciája MHz-ben
+    proc.add(ESP.getFlashChipId());             // [7] flash chip azonosító
+    proc.add(ESP.getFlashChipRealSize());       // [8] Flash chip size
+    proc.add(ESP.getFlashChipSpeed() / 1000000);  // [9] Flash chip frekvenciája MHz-ben
     //-------------------------------------
-    data.add(ESP.getFreeHeap());                // [10] szabad kupac méreté
-    data.add(ESP.getMaxFreeBlockSize());        // [11] legnagyobb összefüggő szabad RAM
-    data.add(ESP.getHeapFragmentation());       // [12] HEAP töredezettség %-ban
+    proc.add(ESP.getFreeHeap());                // [10] szabad kupac méreté
+    proc.add(ESP.getMaxFreeBlockSize());        // [11] legnagyobb összefüggő szabad RAM
+    proc.add(ESP.getHeapFragmentation());       // [12] HEAP töredezettség %-ban
     //-------------------------------------
-    data.add(proc_restart_num);                 // [13] Proc. újraindult x-szer     
-    data.add(ESP.getResetReason());             // [14] utolsó visszaállítás oka 
+    proc.add(proc_restart_num);                 // [13] Proc. újraindult x-szer     
+    proc.add(ESP.getResetReason());             // [14] utolsó visszaállítás oka 
     //-------------------------------------
     FSInfo fs_info;
     LittleFS.info(fs_info);
     used_FS_percent = ((float(fs_info.usedBytes) * 100.0) / float(fs_info.totalBytes));
-    data.add(filesystem);                       // [15] Filesysten tipusa
-    data.add(fs_info.totalBytes);               // [16] Total space (byte)
-    data.add(fs_info.usedBytes);                // [17] Total space used (byte)
-    data.add(used_FS_percent);                  // [18] használatban lévő tárhely 
+    proc.add(filesystem);                       // [15] Filesysten tipusa
+    proc.add(fs_info.totalBytes);               // [16] Total space (byte)
+    proc.add(fs_info.usedBytes);                // [17] Total space used (byte)
+    proc.add(used_FS_percent);                  // [18] használatban lévő tárhely 
     //-------------------------------------            
-    data.add(allrun_perc_int);                  // [19] teljes futásidő     
+    proc.add(allrun_perc_int);                  // [19] teljes futásidő     
     //-------------------------------------
     serializeJson(PROC_json, *response);
     request->send(response);});
@@ -312,11 +293,9 @@ void setup() {
 //-------------------------------------------------------------------------------
   server.on("/ALL_RUN", HTTP_GET, [](AsyncWebServerRequest* request) {        //  EEPROM értékek beírása             
     allrun_perc_int = (request->getParam("data")->value()).toInt();
-
     pref.begin("my-app", false);
     pref.putUInt("allrun_perc", allrun_perc_int);
     pref.end();
-
     if (S_DEBUG)Serial.print(F("pref.putUInt(allrun_perc_int): "));
     if (S_DEBUG)Serial.println(allrun_perc_int);
     request->send_P(200, "text/plain", "INFO adatok: OK");});
@@ -324,11 +303,9 @@ void setup() {
 //-------------------------------------------------------------------------------
   server.on("/X_SZER", HTTP_GET, [](AsyncWebServerRequest* request) {        //  EEPROM értékek beírása             
     proc_restart_num = (request->getParam("data")->value()).toInt();
-
     pref.begin("my-app", false);
     pref.putUInt("counter", proc_restart_num);
     pref.end();
-    
     if (S_DEBUG)Serial.print(F("putUInt(proc_restart_num): "));
     if (S_DEBUG)Serial.println(proc_restart_num);
     request->send_P(200, "text/plain", "X_szer: OK");});
@@ -336,64 +313,54 @@ void setup() {
 
 //-- Info & Setup oldal 1.gomb  --------------------------------------------------  
   server.on("/B_1", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-1 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 1; 
       request->send_P (200, "text/plain", "Button B-1 OK");});
 //-- Info & Setup oldal 2.gomb  --------------------------------------------------    
   server.on("/B_2", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-2 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 2; 
       request->send_P (200, "text/plain", "Button B-2 OK");});
 //-- Info & Setup oldal 3.gomb  --------------------------------------------------   
   server.on("/B_3", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-3 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 3; 
       request->send_P (200, "text/plain", "Button B-3 OK");});
 //-- Info & Setup oldal 4.gomb  --------------------------------------------------     
   server.on("/B_4", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-4 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 4; 
       request->send_P (200, "text/plain", "Button B-4 OK");});
 //-- Info & Setup oldal 5.gomb  --------------------------------------------------    
   server.on("/B_5", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-5 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 5; 
       request->send_P (200, "text/plain", "Button B-5 OK");});
 //-- Info & Setup oldal 6.gomb  --------------------------------------------------     
   server.on("/B_6", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-6 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 6; 
       request->send_P (200, "text/plain", "Button B-6 OK");}); 
 //-- Info & Setup oldal 7.gomb  --------------------------------------------------     
   server.on("/B_7", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-7 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 7; 
-      request->send_P (200, "text/plain", "Button B-6 OK");});
+      request->send_P (200, "text/plain", "Button B-7 OK");});
 //-- Info & Setup oldal 8.gomb  --------------------------------------------------     
   server.on("/B_8", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-8 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 8; 
-      request->send_P (200, "text/plain", "Button B-6 OK");});
+      request->send_P (200, "text/plain", "Button B-8 OK");});
 //-- Info & Setup oldal 9.gomb  --------------------------------------------------     
   server.on("/B_9", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-9 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 9; 
-      request->send_P (200, "text/plain", "Button B-6 OK");});
+      request->send_P (200, "text/plain", "Button B-9 OK");});
 //-- Info & Setup oldal 10.gomb  --------------------------------------------------     
   server.on("/B_10", HTTP_GET, [](AsyncWebServerRequest *request) { 
-      if(S_DEBUG)Serial.println(F("Press B-10 buttun!")); 
       WEB_delay_ul = millis();
       WEB_action_b = 10; 
-      request->send_P (200, "text/plain", "Button B-6 OK");});
+      request->send_P (200, "text/plain", "Button B-10 OK");});
 
 
 //-------------------------------------------------------------------------------- 
@@ -432,7 +399,7 @@ void loop() {
       }
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println();
-      Serial.println(F("WiFi ERROR!"));
+      Serial.println(F("WiFi ERROR, vagy AP mód!"));
       Serial.println();
       }
     else {
@@ -475,7 +442,12 @@ void loop() {
   else {
     Serial.println(F("incomming_COM.txt write ERROR"));}}
     
-// ****************************************************************   
+// ***Web Socket beérkező üzenetek *******************************
+  if ((W_S_rec_int != 500) & (W_S_rec_int != 0)) {
+    if (W_S_rec_int == 10) proc_restart = 10;    // proc restart törlése
+    W_S_rec_int = 500;
+    }
+
 /* **** WEB-ről érkező parancsok késleltetéssel!  *****************
    // WEB_action_b = 0  --> nem csinál semmit 
    // WEB_action_b = 1-10  --> Setup oldalon gombok 1-10 
@@ -487,64 +459,62 @@ void loop() {
 */
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 1) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 1"));
+    if(S_DEBUG)Serial.println(F("Press Button: 1"));
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 2) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 2"));
+    if(S_DEBUG)Serial.println(F("Press Button: 2"));
     WEB_action_b = 0;
     }
   // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 3) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 3"));
-    proc_restart = 1;
+    if(S_DEBUG)Serial.println(F("Press Button: 3"));
     WEB_action_b = 0;
     }
   // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 4) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 4"));
-    proc_restart = 10;
+    if(S_DEBUG)Serial.println(F("Press Button: 4"));
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 5) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 5"));
+    if(S_DEBUG)Serial.println(F("Press Button: 5"));
 
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 6) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 6"));
+    if(S_DEBUG)Serial.println(F("Press Button: 6"));
 
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 7) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 7"));
+    if(S_DEBUG)Serial.println(F("Press Button: 7"));
 
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 8) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 8"));
+    if(S_DEBUG)Serial.println(F("Press Button: 8"));
 
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 9) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 9"));
+    if(S_DEBUG)Serial.println(F("Press Button: 9"));
 
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 10) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.print(F("Button: 10"));
+    if(S_DEBUG)Serial.println(F("Press Button: 10"));
 
     WEB_action_b = 0;
     }                            
       
-// --- 11  --> (EEPROM Clear)---------------
+// --- 11  --> ESP Restart ---------------
   if ((WEB_action_b == 11) & (millis() - WEB_delay_ul > 300)) {
     pref.begin("my-app", false);
     pref.putUInt("allrun_perc", allrun_perc_int);
@@ -597,9 +567,6 @@ void loop() {
   // ------------------ idő -------------------------------------------                 
   if (time(&now) != prevTime) {    // ha az idő megváltozott, mp-enként
     showTime();                   // showTime időadatok
-    // Serial.print(F("Cycle/mp: "));
-    // Serial.println(cycle);
-    // cycle = 0;
     if (blue_led == 1) {
       led_state = !led_state;             // LED villogtatás
       if (led_state) led.on();
@@ -612,41 +579,12 @@ void loop() {
     prevTime = time_t(now);
     }
 
-/*      cycle++;
-//10:35:57.488 -> Cycle/mp: 6018
-//10:35:57.488 -> * * * AKT_IDO_CHAR_10 [4] (percenként)* * *
-//10:35:57.488 -> 2023-01-13 - 10:36:00 - 1673602560 - péntek
-//10:35:57.488 -> allrun_perc_int: 3852
-//10:35:57.488 -> 10:36:00
-//10:35:58.467 -> Cycle/mp: 5834
-//10:35:59.482 -> Cycle/mp: 6000
-*/
-   
-  
+
 //--- Ha a dátum változik ---------------------------------
   if (DATE_STRING != DATE_STRING_old) {                    // ha változik a dátum
-    ws.textAll("08" + DATE_STRING + "*" + DAYNAME);
-    setenv("TZ", "GMT0", 1);   // GMT
-    tzset();
-    tm x_time;                    // időstruktúra
-    x_time.tm_year = N_YEAR - 1900;
-    x_time.tm_mon = N_MONTH - 1;
-    x_time.tm_mday = N_DAY;
-    x_time.tm_hour = 12;
-    x_time.tm_min = 0;
-    x_time.tm_sec = 0;
-    mai_epo = mktime(&x_time);
-    setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);    // budapest
-    tzset();
-    mai_filename = "/temp_log/" + String(mai_epo) + ".txt";
-    if (S_DEBUG)Serial.print(F("mai_filename: "));
-    if (S_DEBUG)Serial.println(mai_filename);
-    if ((make_log == 1) & (N_EPO > 1577833200)) {  // ha van loggolás, és 2020.01.01. után vagyunk...
-      new_logfile();
-      }                         // ... hogy rosz szinkron (1970.01.01)esetén ne zavarja meg                    
+    ws.textAll("08" + DATE_STRING + "*" + DAYNAME);                  
     DATE_STRING_old = DATE_STRING;
     }
-
 
     // *** minden 5. mp-ben, char=5 -> byte=53 ************************
     if (mp_x_dik == 53){      
@@ -694,8 +632,8 @@ void loop() {
 // https://techtutorialsx.com/2019/06/13/esp8266-spiffs-appending-content-to-file/ 
 //----- minden óra, 00, 10, 20, 30, 40, 50 percnél, egyszer --------------------------
    if (((N_MIN == 0) || (N_MIN == 10) || (N_MIN == 20) || (N_MIN == 30) || (N_MIN == 40)
-     || (N_MIN == 50)) & (log_egyszer == 1) & (N_EPO > 1577833200)) {          //2020.01.01. után
-     if (make_log == 1) {           // Loggolás SD kártyára        
+     || (N_MIN == 50)) & (log_egyszer == 1) & (N_EPO > 1577833200)) {    //2020.01.01. után
+     if (make_log == 1) {                                                // Loggolás SD kártyára        
        File fileToAppend = LittleFS.open(mai_filename, "a");
        if (!fileToAppend) {
          if (S_DEBUG) { Serial.println(F("Nem sikerült megnyitni a fájlt, fozzáíráshoz!")); }
@@ -748,7 +686,9 @@ void loop() {
 // ***** futásidő számlálót EEPROM-ba ********************************************************************
 // ** minden nap 11:01:01, és 23:01:01-kor, csak egyszer, elmenti a teljes futásidő számlálót EEPROM-ba **
    if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 1) & (N_SEC == 1) & (run_save_egyszer == 0)) {
-            // teljes futásidő, percben      
+     pref.begin("my-app", false);
+     pref.putUInt("allrun_perc", allrun_perc_int);   // teljes futásidő, percben 
+     pref.end();
      if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
      if (S_DEBUG)Serial.print(F("futásidő mentés:  "));
      if (S_DEBUG)Serial.println(DATE_STRING + " - " + TIME_STRING);

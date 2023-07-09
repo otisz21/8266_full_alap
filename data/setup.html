@@ -3,8 +3,7 @@
 <head>
   <title>SETUP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="Generator" content="Notepad++"/>
-  <meta name="Author" content="OTT Co."/>  
+  <meta name="Author" content="OTT"/>  
   <meta charset="UTF-8"/>  
   <meta name="google" content="notranslate" />
   <link rel="stylesheet" type="text/css" href="all_style.css">     
@@ -46,38 +45,24 @@
 
 <!-- ---------------------------------------------------------------------------- -->
 
-    <div class="hyp">&nbsp
-     <div class="first"><u>Senzor type:</u></div>
-      <div class="second">
-      <span style="vertical-align:top;" id='SENZ_T'>BME-280 (I2C)</span>
-      </div>
-    </div> 
+<h2 style="padding-top:2px; font-weight: normal;"><u>ESP PlatformIO project:</u></h2>
+<h2> <span id='J_SV'>project name</span></h2>
 
-    <div class="hyp">&nbsp
-     <div class="first"><u>Senzor:</u></div>
-      <div class="second">
-      <span style="vertical-align:top;" id='SENZ_OK'>RESULT</span>
-      </div>
-    </div> 
+<h2 style="padding-top:8px; font-weight: normal;"><u>ESP szoftver fordítás időpontja:</u></h2>
+<h2> <span id='J_ST'>comp. time</span></h2>
+
+<h2 style="padding-top:8px; font-weight: normal;"><u>Processor modul type:</u></h2>
+<h2> <span id='J_BOARD'>modul type</span></h2>
 
 <hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
 
-    <h2 style="padding-top:2px; font-weight: normal;"><u>ESP PlatformIO project:</u></h2>
-    <h2> <span id='J_SV'>project name</span></h2>
-    
-    <h2 style="padding-top:8px; font-weight: normal;"><u>ESP szoftver fordítás időpontja:</u></h2>
-    <h2> <span id='J_ST'>comp. time</span></h2>
+<h2 style="padding-top:4px; padding-bottom:30px; font-weight: normal;"><u>Futás idő:</u> <br>
+    <span style="font-size:20px; font-weight: bold;" id='J_SRUN'>10 év, 145 nap, 25 óra, 45 perc.</span>
+</h2>
 
-    <h2 style="padding-top:8px; font-weight: normal;"><u>Processor modul type:</u></h2>
-    <h2> <span id='J_BOARD'>modul type</span></h2> 
-
-<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
-      
-    <h2 style="padding-top:4px; padding-bottom:30px; font-weight: normal;"><u>Futás idő:</u> <br>
-    <span style="font-size:20px; font-weight: bold;" id='J_SRUN'>10 év, 145 nap, 25 óra, 45 perc.</span></h2>
- 
-    <h2 style="padding-top:2px; padding-bottom:30px; font-weight: normal;"><u>Teljes futás idő (SUM):</u> <br>
-    <span style="font-size:20px; font-weight: bold;" id='J_SRUN_ALL'>10 év, 145 nap, 25 óra, 45 perc.</span></h2>       
+<h2 style="padding-top:2px; padding-bottom:30px; font-weight: normal;"><u>Teljes futás idő (SUM):</u> <br>
+    <span style="font-size:20px; font-weight: bold;" id='J_SRUN_ALL'>10 év, 145 nap, 25 óra, 45 perc.</span>
+</h2>
    
 <hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:4px;">  
 
@@ -90,25 +75,23 @@
 
 <hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:2px;">
 
-<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:1px;">
-    <label style="padding-bottom:-5px; padding-top:-5px;">Log fájlok készítése: <input 
-    type="checkbox" class="check_setup" id="MAKE_LOG"
-    onchange= "valtozas ()" /></label>         
+<h4 style="text-align: right; margin-right: 20px; margin-top: 1px; margin-bottom: 1px;">
+    <label class="info_sor_1">Log fájlok készítése:
+        <input type="checkbox" id="MAKE_LOG" onchange="valtozas ()" /></label>
 </h4>
 
-<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:-2px;">
-    <label style="padding-bottom:-5px; padding-top:-5px;">Serial (COM) vonalon 
-    információk: <input type="checkbox" class="check_setup" id="S_DEBUG"
-    onchange= "valtozas ()" /></label>         
-</h4> 
-
-<h4 style="text-align:right; margin-right:25px; font-size:16px; margin-bottom:1px; margin-top:-2px;">
-    <label style="padding-bottom:-5px; padding-top:-5px;"
-    >Alaplapi kék LED (program futás): <input type="checkbox" 
-    class="check_setup" id="BLUE_LED" onchange= "valtozas ()" /></label>         
+<h4 style="text-align: right; margin-right: 20px; margin-top: 1px; margin-bottom: 1px;">
+    <label class="info_sor_1">Serial (COM) vonalon
+        információk:
+        <input type="checkbox" id="S_DEBUG" onchange="valtozas ()" /></label>
 </h4>
 
-<hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:80%">
+<h4 style="text-align: right; margin-right: 20px; margin-top: 1px; margin-bottom: 1px;">
+    <label class="info_sor_1">Alaplapi kék LED (program futás):
+        <input type="checkbox" id="BLUE_LED" onchange="valtozas ()" /></label>
+</h4>
+
+<hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:85%">
  
 <button id="GOMB_SEND" class='myButton myB_start' 
         style="width:60%;" onclick="save();" >SAVE</button>
@@ -119,42 +102,33 @@
 <p><b>Gombok, próbákhoz.</b></p>    
 <p style="margin-top:10px;">
     <button class="button_P"
-     id="B_1" onclick="BUTTON (1);" >1.<br>WS send<br>num: 10</button>
-
+     id="B_1" onclick="BUTTON (1);" >1.<br>WS send:<br>num: 10</button>
     <button class="button_P"
-     id="B_2" onclick="BUTTON (2);" >2.<br>WS send<br>String: "10"</button>
+     id="B_2" onclick="BUTTON (2);" >2.<br>WS send:<br>String: "10"</button>
 </p>
-
 <p style="margin-top:10px;">
     <button class="button_P"
-     id="B_3" onclick="BUTTON (3);" >3.<br>proc_restart:<br>1</button>
-
+     id="B_3" onclick="BUTTON (3);" >3.<br>WS send:<br>1280</button>
     <button class="button_P"
-     id="B_4" onclick="BUTTON (4);" >4.<br>proc_restart:<br>10</button>
+     id="B_4" onclick="BUTTON (4);" >4.<br>WS send:<br>"Hello"</button>
 </p>
-
 <p style="margin-top:10px;">
     <button class="button_P"
      id="B_5" onclick="BUTTON (5);" >5.<br>- - - -<br>- - - -</button>
-
     <button class="button_P"
      id="B_6" onclick="BUTTON (6);" >6.<br>- - - -<br>- - - -</button>
 </p>
-
 <p style="margin-top:10px;">
     <button class="button_P"
      id="B_7" onclick="BUTTON (7);" >7.<br>- - - -<br>- - - -</button>
-
     <button class="button_P"
      id="B_8" onclick="BUTTON (8);" >8.<br>- - - -<br>- - - -</button>
 </p>
-
 <p style="margin-top:10px;">
     <button class="button_P"
      id="B_9" onclick="BUTTON (9);" >9.<br>- - - -<br>- - - -</button>
-
     <button class="button_P"
-     id="B_10" onclick="BUTTON (10);" >10.<br>ESP.restart()<br>!</button>
+     id="B_10" onclick="BUTTON (10);" >10.<br>- - - -<br>- - - -</button>
 </p>
 
 <hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:10px;">             
