@@ -1,5 +1,4 @@
  
-  var cool_on_off;
   var Senz_type;
   JSON_adatok();
 
@@ -61,7 +60,7 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', onLoad);
 function initWebSocket() {
-  console.log('Trying to open a WebSocket connection...');
+  //console.log('Trying to open a WebSocket connection...');
   websocket = new WebSocket(gateway);
   websocket.onopen = onOpen;
   websocket.onclose = onClose;
@@ -69,12 +68,12 @@ function initWebSocket() {
 }
 
 function onOpen(event) {
-  console.log('Connection opened');
+  //console.log('Connection opened');
   websocket.send("Hello (WS)");
 }
 
 function onClose(event) {
-  console.log('Connection closed');
+  //console.log('Connection closed');
   setTimeout(initWebSocket, 2000);
 }
 
@@ -87,8 +86,8 @@ function onMessage(event) {
   //console.log("onMessage(event): ", event.data);
   var rec_ID = parseInt(event.data.substring(0, 2));
   var rec_text = event.data.substring(2);
-  console.log("rec_ID: ", rec_ID);
-  console.log("rec_text: ", rec_text);
+  //console.log("rec_ID: ", rec_ID);
+  //console.log("rec_text: ", rec_text);
 
   if (rec_ID == 1) {
     document.getElementById("TIME").innerHTML = rec_text;  // N_TIME_STRING

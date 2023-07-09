@@ -68,6 +68,9 @@ bool S_DEBUG = true;       // hogy legyen soros monitor ellenőrzés
 bool make_log;
 bool blue_led;
 bool led_state;
+bool led_on_off;
+unsigned long led_delay_ul;
+unsigned long led_blink_time_ul;
 byte log_egyszer = 1;
 
 String mai_filename;
@@ -85,7 +88,7 @@ byte run_save_egyszer;
 unsigned long WEB_delay_ul;   // késleltetésekhez loop-ban
 byte WEB_action_b = 0;        // webről érkező kérések, loopban végrehajtásához
 String W_S_rec_str;
-int W_S_rec_int = 500;
+int W_S_rec_int = 99;
 byte S_deb_valt = 10;
 
 // --- SD kártya --------------------------------------

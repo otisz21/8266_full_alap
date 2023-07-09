@@ -1,5 +1,3 @@
-
-var NTP_data;
     
 get_JSON();
 //-----------------------------------------------------------------------------
@@ -31,7 +29,7 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', onLoad);
 function initWebSocket() {
-console.log('Trying to open a WebSocket connection...');
+//console.log('Trying to open a WebSocket connection...');
 websocket = new WebSocket(gateway);
 websocket.onopen = onOpen;
 websocket.onclose = onClose;
@@ -39,12 +37,12 @@ websocket.onmessage = onMessage;
 }
 
 function onOpen(event) {
-console.log('Connection opened');
+//console.log('Connection opened');
 websocket.send("Hello (WS)");
 }
 
 function onClose(event) {
-console.log('Connection closed');
+//console.log('Connection closed');
 setTimeout(initWebSocket, 2000);
 }
 

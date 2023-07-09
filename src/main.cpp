@@ -405,13 +405,10 @@ void loop() {
       Serial.print("TCP-PORT   : "); Serial.println(TCP_PORT);
       Serial.print("Hostname   : "); Serial.println(WiFi.getHostname());
       Serial.print("WiFi MAC   : "); Serial.println(WiFi.macAddress());
-      //wl_status_t w_status = WiFi.status();
       Serial.print("WiFi status: "); Serial.println(wifi_status_to_string(WiFi.status()));
-
       Serial.print("gateway-IP : "); Serial.println(WiFi.gatewayIP());
       Serial.print("wifi-Mode  : "); Serial.println(wifi_mode_to_string(WiFi.getMode()));
       // WiFi.getMode() =  // 0=WIFI_OFF,  1=WIFI_STA,  2=WIFI_AP,  3=WIFI_AP_STA
-
       Serial.print("SleepMode  : "); Serial.println(WiFi.getSleepMode());
       Serial.print("AutoConnect: "); Serial.println(WiFi.getAutoReconnect());
       Serial.println();
@@ -424,40 +421,52 @@ void loop() {
 // PRÓBA!!! 
   if (Serial.available()) {
     String incoming = Serial.readString();
-    
     Serial.print(F("Serial text: "));
     Serial.println(incoming);
-    
     File dataFile = LittleFS.open("/serial/incomming_serial.txt", "w");
-  if (dataFile) {
-    dataFile.println(incoming);
-    dataFile.close();
-    Serial.println(F("incomming_COM.txt write OK"));}
-  else {
-    Serial.println(F("incomming_COM.txt write ERROR"));}}
+    if (dataFile) {
+      dataFile.println(incoming);
+      dataFile.close();
+      Serial.println(F("incomming_COM.txt write OK"));
+      }
+    else {
+      Serial.println(F("incomming_COM.txt write ERROR"));
+      }
+    }
     
 // ***Web Socket beérkező üzenetek *******************************
-  if ((W_S_rec_int != 500) & (W_S_rec_int != 0)) {
+  if ((W_S_rec_int != 99) & (W_S_rec_int != 0)) {
     if (W_S_rec_int == 10) proc_restart = 10;    // proc restart törlése
     if (W_S_rec_int == 21) WAN_IP_CHECK_easyddns();
     if (W_S_rec_int == 22) URL_GET (W_S_rec_str); 
-    W_S_rec_int = 500;
+    W_S_rec_int = 99;
     }
 
 
 // ****** időkezelés **********************************                             
   if (time(&now) != prevTime) {    // ha az idő megváltozott, mp-enként
-    showTime();                   // showTime időadatok
-    if (blue_led == 1) {
-      led_state = !led_state;             // LED villogtatás
-      if (led_state) led.on();
-      else led.off();
+    showTime();                    // showTime időadatok
+    if (blue_led == 1) {           // LED villogtatás
+      if(WiFi.status() != WL_CONNECTED){  // nincs WiFi -gyors
+        led_blink_time_ul = 200;
+      }            
+      else {                              // van WiFi - lassú
+        led_blink_time_ul = 1000;
+      }
       }
     if (proc_restart == 10) {
       proc_restart = 0;
       ws.textAll("03");
       }
     prevTime = time_t(now);
+    }
+
+  if ((blue_led == 1) & (millis() - led_delay_ul > led_blink_time_ul)) {
+    led_state = !led_state;             // LED villogtatás
+    // Serial.println("led_state vált.");
+    if (led_state) led.on();
+    else led.off();
+    led_delay_ul = millis();
     }
 
 //--- Ha a dátum változik ---------------------------------
@@ -537,7 +546,7 @@ void loop() {
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 5) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 5"));
-
+    Serial.println(readFile(LittleFS, "/serial/incomming_serial.txt"));
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------

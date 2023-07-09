@@ -2,8 +2,6 @@ var year = 0;
 var day = 0;
 var hour = 0;
 var all = 0;
-var SD_OK = 0; 
-
 document.getElementById("BUSY_1").style.visibility = "hidden";
 
 //---- JSON adatok --------------------------------------------------      
@@ -13,7 +11,7 @@ document.getElementById("BUSY_1").style.visibility = "hidden";
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
         adatok = JSON.parse(xhr.responseText);
-        console.log(JSON.stringify(adatok, null, '\t'));     // "szépen" kiírt JSON        
+        //console.log(JSON.stringify(adatok, null, '\t'));     // "szépen" kiírt JSON        
 
         document.getElementById("PROC_0").innerHTML = adatok.proc[0].toFixed(2); // Proc. fesz.
         document.getElementById("PROC_1").innerHTML =
@@ -161,7 +159,7 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', onLoad);
 function initWebSocket() {
-console.log('Trying to open a WebSocket connection...');
+//console.log('Trying to open a WebSocket connection...');
 websocket = new WebSocket(gateway);
 websocket.onopen = onOpen;
 websocket.onclose = onClose;
@@ -169,12 +167,12 @@ websocket.onmessage = onMessage;
 }
 
 function onOpen(event) {
-console.log('Connection opened');
+//console.log('Connection opened');
 websocket.send("Hello (WS)");
 }
 
 function onClose(event) {
-console.log('Connection closed');
+//console.log('Connection closed');
 setTimeout(initWebSocket, 2000);
 }
 

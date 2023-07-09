@@ -168,12 +168,14 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     data[len] = 0;
     W_S_rec_str = "";
     for (unsigned int i = 0; i < len; i++) W_S_rec_str += ((char)data[i]);
+    if (S_DEBUG) Serial.print(F("W_S_rec_str (str_all): "));
+    if (S_DEBUG) Serial.println(W_S_rec_str);    
     W_S_rec_int = W_S_rec_str.substring(0, 2).toInt();
     W_S_rec_str = W_S_rec_str.substring(2);
-    if (S_DEBUG) Serial.print(F("W_S_rec_str: "));
+    if (S_DEBUG) Serial.print(F("W_S_rec_int (str_0-2): "));
+    if (S_DEBUG) Serial.println(W_S_rec_int);    
+    if (S_DEBUG) Serial.print(F("W_S_rec_str (str_2.-): "));
     if (S_DEBUG) Serial.println(W_S_rec_str);
-    if (S_DEBUG) Serial.print(F("W_S_rec_int: "));
-    if (S_DEBUG) Serial.println(W_S_rec_int);
     }
   }
 

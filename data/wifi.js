@@ -9,7 +9,7 @@ xhr.send();
 xhr.onreadystatechange = function () {
   if (this.readyState == 4 && this.status == 200) {
     data = JSON.parse(xhr.responseText);
-    console.log(JSON.stringify(data, null, '\t'));
+    //console.log(JSON.stringify(data, null, '\t'));
 
     // -- milyen mód van elmentve, mi látszódjon  ----
     if (data.wifi_alap[0] === "WIFI_STA") {                          // STA mód
@@ -33,14 +33,8 @@ xhr.onreadystatechange = function () {
     document.getElementById("WIFI_5").innerHTML = data.wifi_alap[5];
     document.getElementById("WIFI_6").innerHTML = data.wifi_alap[6];
     document.getElementById("WIFI_7").innerHTML = data.wifi_alap[7];
-    
+
     document.getElementById("AP_SSID").innerHTML = data.wifi_alap[8];
-
-    // if (WIFI_adatok.rssi < 0){  
-    //     document.getElementById("WIFI_0").innerHTML = "Client mode";}
-    // else{  
-    //     document.getElementById("WIFI_0").innerHTML = "Access Point";} 
-
     JSON_refresh();
   }
 }                
@@ -58,7 +52,6 @@ function JSON_refresh (){
   document.getElementById("_7").style.display = "none";
   document.getElementById("_8").style.display = "none";        
   document.getElementById("w_db").innerHTML = data.wifi_scan[0];
-
   if (data.wifi_scan[0] < 1) {
     document.getElementById("egysem_txt").style.display = "block";
   }
@@ -150,10 +143,8 @@ function valtozas_ssid() {
     wifi_mode = 0;}                                         // wifi hálózat, 0->AP-mód
   else{                                                     // STA-mód
     wifi_mode = 1;}                                         // wifi hálózat, 1->STA mód(client)
-  
   var ssid = document.getElementById("ssid_data").value;  
   var pasw = document.getElementById("pass_data").value;   
-  
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/W_data?wifi_mode="+wifi_mode+"&ssid="+ssid+"&pasw="+pasw, true);
   xhr.send();}
@@ -181,7 +172,7 @@ function valtozas_ssid() {
   var websocket;
   window.addEventListener('load', onLoad);
   function initWebSocket() {
-  console.log('Trying to open a WebSocket connection...');
+  //console.log('Trying to open a WebSocket connection...');
   websocket = new WebSocket(gateway);
   websocket.onopen = onOpen;
   websocket.onclose = onClose;
@@ -189,12 +180,12 @@ function valtozas_ssid() {
   }
   
   function onOpen(event) {
-  console.log('Connection opened');
+  //console.log('Connection opened');
   websocket.send("Hello (WS)");
   }
   
   function onClose(event) {
-  console.log('Connection closed');
+  //console.log('Connection closed');
   setTimeout(initWebSocket, 2000);
   }
   
@@ -217,7 +208,7 @@ function onMessage(event) {
     document.getElementById("rescan_B").style.backgroundColor = "lightgreen";
     document.getElementById("rescan_B").value = "Wi-Fi Rescan";
     JSON_refresh();
-    console.log(JSON.stringify(data, null, '\t'));      // "szépen" kiírt JSON    
+    //console.log(JSON.stringify(data, null, '\t'));      // "szépen" kiírt JSON    
   }
 
 } 

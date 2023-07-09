@@ -6,8 +6,7 @@
   xhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       adatok = JSON.parse(xhr.responseText);
-      console.log(JSON.stringify(adatok, null, '\t'));      // "szépen" kiírt JSON
-
+      //console.log(JSON.stringify(adatok, null, '\t'));      // "szépen" kiírt JSON
       document.getElementById("TIME").innerHTML = adatok.ddns[0];
       document.getElementById("DATE").innerHTML = adatok.ddns[1];
       document.getElementById("DOW").innerHTML = adatok.ddns[2];
@@ -31,7 +30,7 @@ var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', onLoad);
 function initWebSocket() {
-console.log('Trying to open a WebSocket connection...');
+//console.log('Trying to open a WebSocket connection...');
 websocket = new WebSocket(gateway);
 websocket.onopen = onOpen;
 websocket.onclose = onClose;
@@ -39,12 +38,12 @@ websocket.onmessage = onMessage;
 }
 
 function onOpen(event) {
-console.log('Connection opened');
+//console.log('Connection opened');
 websocket.send("Hello (WS)");
 }
 
 function onClose(event) {
-console.log('Connection closed');
+//console.log('Connection closed');
 setTimeout(initWebSocket, 2000);
 }
 
