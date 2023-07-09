@@ -7,6 +7,7 @@
 #include <ESP8266HTTPClient.h>
 #include <SimpleFTPServer.h>  // FTP server 
 #include <AsyncElegantOTA.h>  // Elegant OTA 
+#include <ESP_DoubleResetDetector.h>
 #include <FS.h>               // Fájlrendszer kezelés miatt, favicon.ico fájlként feltöltve
 #include <LittleFS.h>         // Fájlrendszer kezelés
 #include <ArduinoJson.h>
@@ -22,6 +23,9 @@
 #define LED_PIN 2  // Use the built-in LED
 Led led(LED_PIN);  // led objektum, LED_PIN-t OUTPUT-ra állítja
 
+#define DRD_TIMEOUT  10
+#define DRD_ADDRESS   0
+DoubleResetDetector* drd;
 Preferences pref;
 WiFiClient client;  // or WiFiClientSecure for HTTPS
 FtpServer ftpSrv;   // set #define FTP_DEBUG in ESP8266FtpServer.h to see ...
@@ -34,11 +38,26 @@ ADC_MODE(ADC_VCC);
 //-- SETUP ------------------------------------------------------------------
 void setup() {                  
   Serial.begin(115200);
+  delay(10);
+  pref.begin("my-app", false);
+  //drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-
+  drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
+  if (drd->detectDoubleReset()) {
+    drd_status = true;
+    pref.putBool("wifi_pref_mode", 0); // AP mód - 0
+    }
+  else {
+    drd_status = false;
+    }
+  //drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-
+
   delay(2000);
   PROJECT_INFO();
 
 //---- mentett adatok kiolvasása--------------------------
-  pref.begin("my-app", false);
+  
+  if (drd_status) Serial.println(F("Double-Reset észlelve, mode->AP"));
+  else Serial.println(F("Nincs érzékelve Double-Reset"));  
 
   proc_restart_num = pref.getUInt("counter", 0);
   allrun_perc_int = pref.getUInt("allrun_perc", 0);
@@ -386,7 +405,8 @@ void setup() {
 //-- LOOP -------------------------------------------------------------------
 void loop() { 
   ftpSrv.handleFTP();
-  MDNS.update(); 
+  MDNS.update();
+  drd->loop(); 
 
   if (S_DEBUG != S_deb_valt) {
     if (S_DEBUG) {

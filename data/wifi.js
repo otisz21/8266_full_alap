@@ -12,7 +12,7 @@ xhr.onreadystatechange = function () {
     console.log(JSON.stringify(data, null, '\t'));
 
     // -- milyen mód van elmentve, mi látszódjon  ----
-    if (data.wifi_alap[0] == "WIFI_STA") {                          // STA mód
+    if (data.wifi_alap[0] === "WIFI_STA") {                          // STA mód
       document.getElementById("NO_WIFI").checked = false;
       document.getElementById("WIFI_VAN").style.display = "block";
       document.getElementById("NO_WIFI_INFO").style.display = "none";

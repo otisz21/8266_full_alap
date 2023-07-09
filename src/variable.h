@@ -6,6 +6,7 @@
 // ********************************************************************************  
 // --- verziószámok, dátumok,------------------------- 
 String comp_idopont;     //ESP Szoftver fordításának ideje (automatikusan kapja meg)
+bool drd_status;
 
 // ******* FIX adatok ****************************
 String project = "8266_full_alap";
