@@ -34,31 +34,25 @@ AsyncWebSocket ws("/ws");
 
 ADC_MODE(ADC_VCC);
       
-// ************************************************************************** 
-//-- SETUP ------------------------------------------------------------------
+// * SETUP ************************************************************** 
 void setup() {                  
   Serial.begin(115200);
   delay(10);
   pref.begin("my-app", false);
+
   //drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-
   drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
-  if (drd->detectDoubleReset()) {
-    drd_status = true;
-    pref.putBool("wifi_pref_mode", 0); // AP mód - 0
-    }
-  else {
-    drd_status = false;
-    }
+  if (drd->detectDoubleReset()) drd_status = true;     // AP mód - 0
+  else drd_status = false;
   //drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-
 
   delay(2000);
   PROJECT_INFO();
-
-//---- mentett adatok kiolvasása--------------------------
   
   if (drd_status) Serial.println(F("Double-Reset észlelve, mode->AP"));
   else Serial.println(F("Nincs érzékelve Double-Reset"));  
 
+//---- mentett adatok kiolvasása--------------------------
   proc_restart_num = pref.getUInt("counter", 0);
   allrun_perc_int = pref.getUInt("allrun_perc", 0);
   S_DEBUG = pref.getBool("S_DEBUG");
@@ -67,22 +61,17 @@ void setup() {
   wifi_pref_mode = pref.getBool("wifi_pref_mode");
   ssid = pref.getString("ssid");
   pass = pref.getString("pw");
-
   proc_restart_num++;
-
   Serial.printf("Current counter value: %u\n", proc_restart_num);
   Serial.printf("allrun_perc_int value: %u\n", allrun_perc_int);
   Serial.printf("S_DEBUG  value       : %u\n", S_DEBUG);
   Serial.printf("make_log value       : %u\n", make_log);
   Serial.printf("blue_led value       : %u\n", blue_led);    
-
   pref.putUInt("counter", proc_restart_num);
-
   pref.end();
-//----------------------------------------------------------
 
+//----------------------------------------------------------
   WiFi.setHostname(project.c_str());
-  
   Serial.println("Connecting ...");
 // ***** WiFi csatlakozás ***********************************
   if (initWiFi()) Serial.println(F("Setup / if (initWiFi())= TRUE (1), ===> Client mód!"));
@@ -101,7 +90,6 @@ void setup() {
     Serial.print(F("mDNS name: http://"));
     Serial.print(mdns_name);
     Serial.println(F(".local"));
-    // Add service to MDNS-SD
     MDNS.addService("http", "tcp", 80);
     }
 
@@ -120,56 +108,49 @@ void setup() {
     configTime(MY_TZ, NTP_SERVER_1, NTP_SERVER_2); //Mytz - Budapest
     settimeofday_cb(NTP_time_is_set);              // opcionális: visszahívás, ha elküldték az időt
 
-  if (WIFI_STA_or_AP == 1) {                       // wifi hálózat, 1->STA mód(client) 
-//**** automatikusan teljesülő kérések ******************************************  
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
-  }
-  else{                                            // wifi hálózat, 0->AP mód
-//**** automatikusan teljesülő kérések ******************************************  
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("wifi.html");  
-  }
-//--------------------------------------------------------------------------------
+// wifi hálózat, 1->STA mód(client)
+  if (WIFI_STA_or_AP == 1) server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+  else server.serveStatic("/", LittleFS, "/").setDefaultFile("wifi.html");  
     
-//*******************************************************************************    
-    server.on("/index_json", HTTP_GET, [](AsyncWebServerRequest* request) {        // JSON adatok Főoldalra
-      AsyncResponseStream* response = request->beginResponseStream("application/json");
-      DynamicJsonDocument IR(512);
-      JsonArray index = IR.createNestedArray("index");
-      index.add(TIME_STRING);              // [0]  
-      index.add(DATE_STRING);              // [1]
-      index.add(DAYNAME);                  // [2]
-      index.add(ESP.getChipId());          // [3]
-      index.add(proc_restart);             // [4]
-      serializeJson(IR, *response);
-      request->send(response);});
+//****** Index, (főoldal) ************************************************    
+  server.on("/index_json", HTTP_GET, [](AsyncWebServerRequest* request) {        // JSON adatok Főoldalra
+    AsyncResponseStream* response = request->beginResponseStream("application/json");
+    DynamicJsonDocument IR(512);
+    JsonArray index = IR.createNestedArray("index");
+    index.add(TIME_STRING);              // [0]  
+    index.add(DATE_STRING);              // [1]
+    index.add(DAYNAME);                  // [2]
+    index.add(ESP.getChipId());          // [3]
+    index.add(proc_restart);             // [4]
+    serializeJson(IR, *response);
+    request->send(response);});
 
-    //**** Info + Setup oldal ********************************************************
-    server.on("/setup_json", HTTP_GET, [](AsyncWebServerRequest* request) {
-      AsyncResponseStream* response = request->beginResponseStream("application/json");
-      DynamicJsonDocument adatok(384);
-      JsonArray setup = adatok.createNestedArray("setup");      
-      setup.add(project);                    // [0] project (a file name, csak main.cpp!)
-      setup.add(comp_idopont);               // [1] fordítás időpontja
-      setup.add(ARDUINO_BOARD);              // [2] modul tipus
-      setup.add(millis64());                 // [3] futásidő
-      setup.add(allrun_perc_int);            // [4] teljes futásidő
-      setup.add(make_log);                   // [5] hogy legyen soros monitor ellenőrzés
-      setup.add(S_DEBUG);                    // [6] készítsen-e log fájlt
-      setup.add(blue_led);                   // [7] villogjon-e a beépített kék led
-      serializeJson(adatok, *response);
-      request->send(response);
-      });
+  //**** Info + Setup oldal ********************************************************
+  server.on("/setup_json", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncResponseStream* response = request->beginResponseStream("application/json");
+    DynamicJsonDocument adatok(384);
+    JsonArray setup = adatok.createNestedArray("setup");
+    setup.add(project);                    // [0] project (a file name, csak main.cpp!)
+    setup.add(comp_idopont);               // [1] fordítás időpontja
+    setup.add(ARDUINO_BOARD);              // [2] modul tipus
+    setup.add(millis64());                 // [3] futásidő
+    setup.add(allrun_perc_int);            // [4] teljes futásidő
+    setup.add(make_log);                   // [5] hogy legyen soros monitor ellenőrzés
+    setup.add(S_DEBUG);                    // [6] készítsen-e log fájlt
+    setup.add(blue_led);                   // [7] villogjon-e a beépített kék led
+    serializeJson(adatok, *response);
+    request->send(response);});
 //--------------------------------------------------------------------------------
-    server.on("/setup_save", HTTP_GET, [](AsyncWebServerRequest* request) {        // Info + Setup adatanak mentése             
-      make_log = (request->getParam("make_log")->value()).toInt();
-      S_DEBUG = (request->getParam("s_debug")->value()).toInt();
-      blue_led = (request->getParam("blue_led")->value()).toInt();
-      pref.begin("my-app", false);
-      pref.putBool("S_DEBUG", S_DEBUG);
-      pref.putBool("blue_led", blue_led);
-      pref.putBool("make_log", make_log);
-      pref.end();
-      request->send_P(200, "text/plain", "setup_SAVE_OK");});
+  server.on("/setup_save", HTTP_GET, [](AsyncWebServerRequest* request) {        // Info + Setup adatanak mentése             
+    make_log = (request->getParam("make_log")->value()).toInt();
+    S_DEBUG = (request->getParam("s_debug")->value()).toInt();
+    blue_led = (request->getParam("blue_led")->value()).toInt();
+    pref.begin("my-app", false);
+    pref.putBool("S_DEBUG", S_DEBUG);
+    pref.putBool("blue_led", blue_led);
+    pref.putBool("make_log", make_log);
+    pref.end();
+    request->send_P(200, "text/plain", "setup_SAVE_OK");});
 
 //**** WIFI setup oldal **********************************************************
 //--------------------------------------------------------------------------------
@@ -203,20 +184,16 @@ void setup() {
 
     serializeJson(WIFI_json, *response);
     request->send(response);});
-
 //-- wifi oldal reset mentés nélkül  ----------------------------------
   server.on("/wifi_reset", HTTP_GET, [](AsyncWebServerRequest* request) {
     WEB_action_b = 11;      //Reset loop-ban
     WEB_delay_ul = millis();
     request->send_P(200, "text/plain", "RESET!");}); 
-
 //--------------------------------------------------------------------------------
   server.on("/wifi_rescan", HTTP_GET, [](AsyncWebServerRequest* request) {
     WEB_action_b = 12;      // WIFI SCAN loop-ban
     WEB_delay_ul = millis();
     request->send_P(200, "text/plain", "WIFI_rescan OK!");});
-
-
 //-- wifi oldal SAVE data és reset -- <form action="/" method="POST"> HTML method---- 
   server.on("/W_data", HTTP_POST, [](AsyncWebServerRequest* request) {      // SSID, pw adatok mentése
     WIFI_STA_or_AP = (request->getParam("wifi_mode")->value()).toInt(); // wifi hálózat 0->AP-mód, 1->STA mód(client) 
@@ -236,24 +213,23 @@ void setup() {
     pref.end();
     request->send(200, "text/plain", "Done. ESP will restart, connect to : " + ssid);});
 
-
 //*********************************************************************************
 //**** NTP setup oldal ************************************************************
 //---------------------------------------------------------------------------------
-  server.on("/NTP_json", HTTP_GET, [](AsyncWebServerRequest *request) {         //  NTP setup oldal JSON adatok küldése
-      AsyncResponseStream *response = request->beginResponseStream("application/json"); 
-      DynamicJsonDocument NTP_adatok(256);
-      JsonArray ntp = NTP_adatok.createNestedArray("ntp");                  
-      ntp.add(TIME_STRING);              // [0] Pontos idő
-      ntp.add(DATE_STRING);              // [1] Dátum
-      ntp.add(DAYNAME);                  // [2] nap neve
-      ntp.add(EPO_STRING);               // [3] epoch time
-      ntp.add(year_x_day);               // [4] az év x. napja
-      ntp.add(winter_sommer_time);       // [5] téli vagy nyári időszámytás
-      ntp.add(NTP_LASTSYNC_STRING);      // [6] az utolsó NTP szinkronizáció ideje
-      ntp.add(mai_epo);                  // [7] mai nap epoch time-ja 12:00-kor
-      serializeJson(NTP_adatok, *response);
-      request->send(response);});
+  server.on("/NTP_json", HTTP_GET, [](AsyncWebServerRequest* request) {         //  NTP setup oldal JSON adatok küldése
+    AsyncResponseStream* response = request->beginResponseStream("application/json");
+    DynamicJsonDocument NTP_adatok(256);
+    JsonArray ntp = NTP_adatok.createNestedArray("ntp");
+    ntp.add(TIME_STRING);              // [0] Pontos idő
+    ntp.add(DATE_STRING);              // [1] Dátum
+    ntp.add(DAYNAME);                  // [2] nap neve
+    ntp.add(EPO_STRING);               // [3] epoch time
+    ntp.add(year_x_day);               // [4] az év x. napja
+    ntp.add(winter_sommer_time);       // [5] téli vagy nyári időszámytás
+    ntp.add(NTP_LASTSYNC_STRING);      // [6] az utolsó NTP szinkronizáció ideje
+    ntp.add(mai_epo);                  // [7] mai nap epoch time-ja 12:00-kor
+    serializeJson(NTP_adatok, *response);
+    request->send(response);});
 
 //*********************************************************************************
 //**** DDNS setup oldal ***********************************************************
@@ -318,7 +294,6 @@ void setup() {
     if (S_DEBUG)Serial.print(F("pref.putUInt(allrun_perc_int): "));
     if (S_DEBUG)Serial.println(allrun_perc_int);
     request->send_P(200, "text/plain", "INFO adatok: OK");});
-
 //-------------------------------------------------------------------------------
   server.on("/X_SZER", HTTP_GET, [](AsyncWebServerRequest* request) {        //  EEPROM értékek beírása             
     proc_restart_num = (request->getParam("data")->value()).toInt();
@@ -380,7 +355,6 @@ void setup() {
       WEB_delay_ul = millis();
       WEB_action_b = 10; 
       request->send_P (200, "text/plain", "Button B-10 OK");});
-
 
 //-------------------------------------------------------------------------------- 
   server.onNotFound([](AsyncWebServerRequest *request){      // ha ismeretlen kérés érkezik
@@ -465,8 +439,71 @@ void loop() {
 // ***Web Socket beérkező üzenetek *******************************
   if ((W_S_rec_int != 500) & (W_S_rec_int != 0)) {
     if (W_S_rec_int == 10) proc_restart = 10;    // proc restart törlése
+    if (W_S_rec_int == 21) WAN_IP_CHECK_easyddns();
+    if (W_S_rec_int == 22) URL_GET (W_S_rec_str); 
     W_S_rec_int = 500;
     }
+
+
+// ****** időkezelés **********************************                             
+  if (time(&now) != prevTime) {    // ha az idő megváltozott, mp-enként
+    showTime();                   // showTime időadatok
+    if (blue_led == 1) {
+      led_state = !led_state;             // LED villogtatás
+      if (led_state) led.on();
+      else led.off();
+      }
+    if (proc_restart == 10) {
+      proc_restart = 0;
+      ws.textAll("03");
+      }
+    prevTime = time_t(now);
+    }
+
+//--- Ha a dátum változik ---------------------------------
+  if (DATE_STRING != DATE_STRING_old) {                    // ha változik a dátum
+    ws.textAll("08" + DATE_STRING + "*" + DAYNAME);                  
+    DATE_STRING_old = DATE_STRING;
+    }
+
+// *** minden 10. mp-b0en, char=0 -> byte=48 ***********************
+  if (mp_x_dik == 48) {
+    ws.textAll("01" + TIME_STRING);
+    ws.cleanupClients();
+    mp_x_dik = 100;
+    }
+
+//******* percenként ******************************************** 
+   // AKT_IDO_CHAR_10: [0][1][2][3][4][5][6][7][8][9]  
+   //             pl.:  1  4  :  2  5  :  3  2  -  -
+   // char.  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, .. 0, 1, ....
+   // byte  48,49,50,51,52,53,54,55,56,57,    (mp_x_dik)
+  if (AKT_IDO_CHAR_10[4] != AKT_IDO_CHAR_10_OLD[4]) {  // percenként - 5. char. [4] 1percenként-enként igaz    
+    allrun_perc_int++;                                 // növeli 1-el futásidő számlálót               
+    AKT_IDO_CHAR_10_OLD[4] = AKT_IDO_CHAR_10[4];
+    }                   // pl.:  1  4  :  2  5  :  3  2  -  -
+
+// ***** futásidő számlálót mentése ********************************************************************
+// ** minden nap 11:01:01, és 23:01:01-kor, csak egyszer, elmenti a teljes futásidő számlálót EEPROM-ba **
+   if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 1) & (N_SEC == 1) & (run_save_egyszer == 0)) {
+     pref.begin("my-app", false);
+     pref.putUInt("allrun_perc", allrun_perc_int);   // teljes futásidő, percben 
+     pref.end();
+     if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
+     if (S_DEBUG)Serial.print(F("futásidő mentés:  "));
+     if (S_DEBUG)Serial.println(DATE_STRING + " - " + TIME_STRING);
+     if (S_DEBUG)Serial.print(F("EE_write_3byte (allrun_perc_int): "));
+     if (S_DEBUG)Serial.println(allrun_perc_int);
+     if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
+     millis64();                 // naponta kétszer meghívja a függvényt (futásidő, ms-okban)
+     run_save_egyszer = 1;
+     }
+
+// ** minden nap 11:31:01, és 23:31:01-kor, visszaállítja "run_save_egyszer" bytot "0"-ra ******************
+   if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 31) & (N_SEC == 1)) {
+     run_save_egyszer = 0;
+     }
+
 
 /* **** WEB-ről érkező parancsok késleltetéssel!  *****************
    // WEB_action_b = 0  --> nem csinál semmit 
@@ -582,157 +619,11 @@ void loop() {
 
       WEB_action_b = 0;}
       
-
-// ****** időkezelés **********************************              
-  // ------------------ idő -------------------------------------------                 
-  if (time(&now) != prevTime) {    // ha az idő megváltozott, mp-enként
-    showTime();                   // showTime időadatok
-    if (blue_led == 1) {
-      led_state = !led_state;             // LED villogtatás
-      if (led_state) led.on();
-      else led.off();
-      }
-    if (proc_restart == 10) {
-      proc_restart = 0;
-      ws.textAll("03");
-      }
-    prevTime = time_t(now);
-    }
-
-
-//--- Ha a dátum változik ---------------------------------
-  if (DATE_STRING != DATE_STRING_old) {                    // ha változik a dátum
-    ws.textAll("08" + DATE_STRING + "*" + DAYNAME);                  
-    DATE_STRING_old = DATE_STRING;
-    }
-
-    // *** minden 5. mp-ben, char=5 -> byte=53 ************************
-    if (mp_x_dik == 53){      
-      //if(S_DEBUG)Serial.println(F("* * xx5. mp * *"));
-      mp_x_dik = 100;}
-
-    // *** minden 10. mp-b0en, char=0 -> byte=48 ***********************
-    if (mp_x_dik == 48) {
-      //if (S_DEBUG)Serial.println(F("* * xx0. mp * *"));
-      ws.textAll("01"+TIME_STRING);
-      mp_x_dik = 100;
-      }
-
-//******* percenként ******************************************** 
-   // AKT_IDO_CHAR_10: [0][1][2][3][4][5][6][7][8][9]  
-   //             pl.:  1  4  :  2  5  :  3  2  -  -
-   // char.  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, .. 0, 1, ....
-   // byte  48,49,50,51,52,53,54,55,56,57,    (mp_x_dik)
-    if (AKT_IDO_CHAR_10[4] != AKT_IDO_CHAR_10_OLD[4]) {  // percenként - 5. char. [4] 1percenként-enként igaz    
-      allrun_perc_int++;                                 // növeli 1-el futásidő számlálót               
-      /*       if (S_DEBUG) {
-              Serial.println(F("* * * AKT_IDO_CHAR_10 [4] (percenként)* * *"));
-              Serial.print(DATE_STRING);
-              Serial.print(F(" - "));
-              Serial.print(TIME_STRING);
-              Serial.print(F(" - "));
-              Serial.print(EPO_STRING);
-              Serial.print(F(" - "));
-              Serial.println(DAYNAME);
-              Serial.print(F("allrun_perc_int: "));
-              Serial.println(allrun_perc_int);
-              Serial.println();
-              } */
-      AKT_IDO_CHAR_10_OLD[4] = AKT_IDO_CHAR_10[4];
-      }                   // pl.:  1  4  :  2  5  :  3  2  -  -
-
-//-------------------------------------------------------------------------------
-//----- minden óra, 00, 09, 19, 29, 39, 49, 54, és 59. perc :50mp-kor ---------------
-    if (((N_MIN == 9) || (N_MIN == 19) || (N_MIN == 29) || (N_MIN == 39) ||
-      (N_MIN == 49) || (N_MIN == 54) || (N_MIN == 59)) & (N_SEC == 50)) {
-      log_egyszer = 1;
-      }
-
-//******* loggolás, 10 percenként ********************************************    
-// https://techtutorialsx.com/2019/06/13/esp8266-spiffs-appending-content-to-file/ 
-//----- minden óra, 00, 10, 20, 30, 40, 50 percnél, egyszer --------------------------
-   if (((N_MIN == 0) || (N_MIN == 10) || (N_MIN == 20) || (N_MIN == 30) || (N_MIN == 40)
-     || (N_MIN == 50)) & (log_egyszer == 1) & (N_EPO > 1577833200)) {    //2020.01.01. után
-     if (make_log == 1) {                                                // Loggolás SD kártyára        
-       File fileToAppend = LittleFS.open(mai_filename, "a");
-       if (!fileToAppend) {
-         if (S_DEBUG) { Serial.println(F("Nem sikerült megnyitni a fájlt, fozzáíráshoz!")); }
-         }
-       if (fileToAppend.print(TIME_STRING)) {         // "09:00:00"
-
-         Serial.println(F("Tartalom hozzáírása a fájlhoz."));
-         }
-       else {
-         if (S_DEBUG) { Serial.println(F("Tartalom hozzáírása a fájlhoz NEM SIKERÜLT!")); }
-         }
-       fileToAppend.close();
-       }
-     log_egyszer = 0;
-     }
-
-//---- minden nap 23:55:00-kor, egyszer, napi átlag, és összegzés -----------------------
-   if ((N_HOUR == 23) & (N_MIN == 55) & (N_SEC == 0) & (log_egyszer == 1)) {
-     if (make_log == 1) {           // Loggolás SD kártyára 
-       File fileToAppend = LittleFS.open(mai_filename, "a");
-       if (!fileToAppend) {
-         if (S_DEBUG) { Serial.println(F("Nem sikerült megnyitni a fájlt, fozzáíráshoz!")); }
-         }
-       fileToAppend.println(F("------------------------------"));
-       fileToAppend.println(F("---- napi min, max, átlag ----"));
-       fileToAppend.println(F("--------- hőfok (°C) ---------"));
-       fileToAppend.close();
-
-       File Append_year = LittleFS.open(year_sum_file, "a");   // létrehozza ...
-       if (!Append_year) {
-         if (S_DEBUG)Serial.println(F("Nem sikerült megnyitni a fájlt, éves report-hoz!"));
-         }
-       if (Append_year.print(MONTH_ARRY[DATE_STRING.substring(5, 7).toInt()])) { // 2023-01-22 ==> "jan."
-         Append_year.print(DATE_STRING.substring(8));                        // 2023-01-22 ==> "jan.22" 
-         //       |    Hőmérséklet  °C   |                                              
-         //dátum  |  min  |  max | átlag |
-         //------------------------------
-         //01-15,  -22.2,  -22.3,   -22.5,
-
-         if (S_DEBUG)Serial.println(F("Napi átlagok hozzáírása az éves fájlhoz"));
-         }
-       else {
-         if (S_DEBUG)Serial.println(F("Napi átlagok hozzáírása a fájlhoz NEM SIKERÜLT!"));
-         }
-       Append_year.close();
-       }
-     log_egyszer = 0;
-     }
-
-// ***** futásidő számlálót EEPROM-ba ********************************************************************
-// ** minden nap 11:01:01, és 23:01:01-kor, csak egyszer, elmenti a teljes futásidő számlálót EEPROM-ba **
-   if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 1) & (N_SEC == 1) & (run_save_egyszer == 0)) {
-     pref.begin("my-app", false);
-     pref.putUInt("allrun_perc", allrun_perc_int);   // teljes futásidő, percben 
-     pref.end();
-     if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
-     if (S_DEBUG)Serial.print(F("futásidő mentés:  "));
-     if (S_DEBUG)Serial.println(DATE_STRING + " - " + TIME_STRING);
-     if (S_DEBUG)Serial.print(F("EE_write_3byte (allrun_perc_int): "));
-     if (S_DEBUG)Serial.println(allrun_perc_int);
-     if (S_DEBUG)Serial.println(F("*   *  *  *  *  *  *  *  *  *"));
-     millis64();                 // naponta kétszer meghívja a függvényt (futásidő, ms-okban)
-     run_save_egyszer = 1;
-     }
-
-// ** minden nap 11:31:01, és 23:31:01-kor, visszaállítja "run_save_egyszer" bytot "0"-ra ******************
-   if (((N_HOUR == 11) || (N_HOUR == 23)) & (N_MIN == 31) & (N_SEC == 1)) {
-     run_save_egyszer = 0;
-     }
-// ********************************************************************************************************     
-//------------------------------------     
+// ********************************************************************************************************        
     } // LOOP vége
+// ***** LOOP vége **********************************************************
 
 #include "F_system.h"
 #include "F_SD_filesystem.h"
    
-// ***** LOOP vége **********************************************************
-
-// http://ip1.dynupdate.no-ip.com/    // NO-IP API-ja        
-// http://ifconfig.me/ip              // easyDDNS ezt használja     
-// http://api.ipify.org/              // ez is működik
 // END -----    

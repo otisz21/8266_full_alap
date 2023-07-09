@@ -31,3 +31,7 @@ void writeFile(fs::FS &fs, const char *path, const char *message);
 void printDirectory(File dir, int numTabs);
 
 void tempek(byte mit);
+
+void WAN_IP_CHECK_easyddns();
+
+void URL_GET (String utvonal);

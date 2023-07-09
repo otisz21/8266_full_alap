@@ -194,6 +194,22 @@ input[type="checkbox"] {
 }
 
 /* --- label ---------------------------*/
+
+textarea {
+    font-size: 16px; 
+    /* font-family: MS MinChe, monospace; */
+    /* font-family: DotunChe, monospace; */
+    font-family: Consolas, monospace;
+    font-weight:bold;
+    }
+
+.label_2 {
+    font-size:16px;
+    font-weight: bold;
+    display: inline;
+    vertical-align: 80px;
+    } 
+
 .square_info {
     height: 31px;
     width: 50px;

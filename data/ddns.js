@@ -15,22 +15,16 @@
   } 
       
 // ----------------------------------------------------------------------    
-function check_WAN_IP() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/check_WAN_IP', true);
-  xhr.send();
+function check_IP() {
+  websocket.send(21);
 }
 
 // ----------------------------------------------------------------------    
-function DDNS_save() {
-  document.getElementById("DDNS_SAVE").style.backgroundColor = "#C5C5C5";
+function check_GET() {
+  var url;
+  url = document.getElementById("url_data").value;
+  websocket.send("22"+url);
 }
-
-// ----------------------------------------------------------------------   
-function valtozas() {
-  document.getElementById("DDNS_SAVE").style.backgroundColor = "#ff0000";
-}  
-
 
 //  *** WebSocket ******************** WebSocket ***************************
 var gateway = `ws://${window.location.hostname}/ws`;
@@ -76,4 +70,12 @@ function onMessage(event) {
     document.getElementById("DATE").innerHTML = napok[0];
     document.getElementById("DOW").innerHTML = napok[1];
   }
+
+  if (rec_ID == 21) {
+    document.getElementById("OUTPUT_1").innerHTML = rec_text;
+  }
+  
+  if (rec_ID == 22) {
+    document.getElementById("OUTPUT_2").innerHTML = rec_text;
+  }  
 }

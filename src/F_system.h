@@ -47,17 +47,18 @@ bool initWiFi() {
   Serial.print(F("- initWiFi(), mode: "));
   Serial.println(WIFI_STA_or_AP);  
 
-  if ((ssid == "") || (pass == "") || (WIFI_STA_or_AP == 0)) {
+  if ((ssid == "") || (pass == "") || (WIFI_STA_or_AP == 0) || (drd_status == 1)) {
     WiFi.disconnect();
     WIFI_SCAN();
     WiFi.disconnect();
     delay(10);    
-    WiFi.softAP(AP_ssid, NULL);      // NULL sets an open Access Point, nincs PW
+    WiFi.softAP(AP_ssid, NULL);      // open Access Point, nincs PW
     Serial.print(F("AP-SSID: "));
     Serial.print(AP_ssid);
     Serial.print(F("  AP-IP: "));
     Serial.println(WiFi.softAPIP());
     WIFI_STA_or_AP = 0;
+    drd_status = 0;
     return false;
     }
   WiFi.mode(WIFI_STA);
@@ -167,7 +168,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     data[len] = 0;
     W_S_rec_str = "";
     for (unsigned int i = 0; i < len; i++) W_S_rec_str += ((char)data[i]);
-    W_S_rec_int = W_S_rec_str.toInt();
+    W_S_rec_int = W_S_rec_str.substring(0, 2).toInt();
+    W_S_rec_str = W_S_rec_str.substring(2);
     if (S_DEBUG) Serial.print(F("W_S_rec_str: "));
     if (S_DEBUG) Serial.println(W_S_rec_str);
     if (S_DEBUG) Serial.print(F("W_S_rec_int: "));
@@ -463,4 +465,54 @@ void tempek(byte mit) {
     http.end();
     if (S_DEBUG)Serial.println(payload);
     }
+  }
+
+
+// ------ IP check easyddns -------------------------------------
+void WAN_IP_CHECK_easyddns() {
+  if (S_DEBUG)Serial.println(F("WAN_IP_CHECK_easyddns()"));
+  HTTPClient http;
+  http.setTimeout(800);
+  http.begin(client, "http://ifconfig.me/ip");
+  httpResponseCode = http.GET();    // Send HTTP GET request       
+  payload = "--";
+  if (httpResponseCode == 200) {
+    if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+    if (S_DEBUG)Serial.println(httpResponseCode);
+    payload = http.getString();
+    ws.textAll("21" + payload);
+    }
+  else {
+    if (S_DEBUG)Serial.print(F("Error code: "));
+    if (S_DEBUG)Serial.println(httpResponseCode);
+    ws.textAll("21" + String(httpResponseCode));
+    }
+  http.end();
+  if (S_DEBUG)Serial.println(payload);
+  }
+
+//-----------------------------------------
+  void URL_GET (String utvonal){
+  if (S_DEBUG)Serial.println(F("URL_GET (String utvonal)"));
+  String keres;
+  keres = "http://";
+  keres += utvonal;
+  HTTPClient http;
+  http.setTimeout(800);
+  http.begin(client, keres);
+  httpResponseCode = http.GET();    // Send HTTP GET request       
+  payload = "--";
+  if (httpResponseCode == 200) {
+    if (S_DEBUG)Serial.print(F("HTTP Response code: "));
+    if (S_DEBUG)Serial.println(httpResponseCode);
+    payload = http.getString();
+    ws.textAll("22" + payload);
+    }
+  else {
+    if (S_DEBUG)Serial.print(F("Error code: "));
+    if (S_DEBUG)Serial.println(httpResponseCode);
+    ws.textAll("22" + String(httpResponseCode));
+    }
+  http.end();
+  if (S_DEBUG)Serial.println(payload);
   }
