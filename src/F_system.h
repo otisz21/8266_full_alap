@@ -252,9 +252,6 @@ void showTime() {
   TIME_STRING += ":";
   TIME_STRING += first_0(timeinfo.tm_sec);
 
-  N_YEAR = timeinfo.tm_year + 1900;
-  N_MONTH = timeinfo.tm_mon + 1;
-  N_DAY = timeinfo.tm_mday;
   N_HOUR = timeinfo.tm_hour;
   N_MIN = timeinfo.tm_min;
   N_SEC = timeinfo.tm_sec;
@@ -277,6 +274,7 @@ void showTime() {
   }
 // ---------------------------------------------------------------------------
 String first_0(int adat) {        // 9:2 ==> 09:02
+  String vissza;
   if (adat < 10) vissza = "0" + String(adat);
   else vissza = String(adat);
   return vissza;
