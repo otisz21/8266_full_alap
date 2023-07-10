@@ -87,7 +87,7 @@ bool initWiFi() {
   else {
     WIFI_STA_or_AP = 1;
     Serial.println('\n');
-    Serial.print(" * * * WiFi connected:\t ");
+    Serial.print(" * * * WiFi connected:\t");
     Serial.println(WiFi.SSID());          // Melyik hálózathoz csatlakozunk
     Serial.print(" * * * WiFi local IP :\t");
     Serial.println(WiFi.localIP());       // ESP8266 IP-címe    
@@ -161,7 +161,7 @@ void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType 
     }
   }
 
-// Web Socket, ha adat érkrzik Clienstől -------------------------------------------------
+// Web Socket, ha adat érkrzik Clienstől ---------------------------------------------
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   AwsFrameInfo* info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
@@ -352,6 +352,76 @@ String wifi_mode_to_string(int w_mode) {
   return WiFi_mode_String;
   }
 
+// Read File from LittleFS
+String readFile(fs::FS& fs, const char* path) {
+  if (S_DEBUG)Serial.printf("Reading file: %s\r\n", path);
+  File file = fs.open(path, "r");
+  if (!file || file.isDirectory()) {
+    if (S_DEBUG)Serial.println("- failed to open file for reading");
+    return String();
+    }
+  String fileContent;
+  while (file.available()) {
+    fileContent = file.readStringUntil('\n');
+    break;
+    }
+  file.close();
+  return fileContent;
+  }
+
+// Write file to LittleFS
+void writeFile(fs::FS& fs, const char* path, const char* message) {
+  if (S_DEBUG)Serial.printf("Writing file: %s\r\n", path);
+
+  File file = fs.open(path, "w");
+  if (!file) {
+    if (S_DEBUG)Serial.println("- nem sikerült megnyitni a directorit, íráshoz!");
+    return;
+    }
+  if (file.print(message)) {
+    if (S_DEBUG)Serial.println("- file írása: sikeres!");
+    }
+  else {
+    if (S_DEBUG)Serial.println("- file írása: sikertelen!");
+    }
+  file.close();
+  }
+  
+// --- Directory listázása Little FS-ből -------------------------------------
+void listDir(const char * dirname) {
+  Serial.printf("Print Directory: %s\n", dirname);
+  Serial.println();
+  Dir dir = LittleFS.openDir(dirname);
+  while (dir.next()) {
+    if (dir.isFile()) {
+      Serial.println(F("- FILE:"));
+      Serial.print(F("  "));
+      Serial.print(dir.fileName());
+      Serial.print(F("  SIZE: "));
+      Serial.println(dir.fileSize());
+      time_t cr = dir.fileCreationTime();
+      time_t lw = dir.fileTime();
+      struct tm * tmstruct = localtime(&cr);
+      Serial.printf("  CREATION: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 
+                      1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday,
+                      tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+      tmstruct = localtime(&lw);
+      Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 
+                      1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, 
+                      tmstruct->tm_min, tmstruct->tm_sec);
+      }
+    if (dir.isDirectory()) {
+      Serial.println(F("- DIRECTORY:"));
+      Serial.print(F("  "));
+      Serial.print(dirname);
+      Serial.print(F("/"));
+      Serial.println(dir.fileName());
+      }
+    Serial.println(F(" * * * "));
+    Serial.println();
+    }
+  }
+  
 //-------- egyéb hőmérsékletek -----------------------------             
 void tempek(byte mit) {
   // mit=0-semmi, 
@@ -468,7 +538,6 @@ void tempek(byte mit) {
     if (S_DEBUG)Serial.println(payload);
     }
   }
-
 
 // ------ IP check easyddns -------------------------------------
 void WAN_IP_CHECK_easyddns() {

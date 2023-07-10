@@ -28,10 +28,11 @@ String wifi_mode_to_string(int w_mode);
 // ****************** F_SD_filesystem.h *********************************
 String readFile(fs::FS &fs, const char *path);
 void writeFile(fs::FS &fs, const char *path, const char *message);
-void printDirectory(File dir, int numTabs);
+void listDir(const char * dirname);
 
 void tempek(byte mit);
 
 void WAN_IP_CHECK_easyddns();
 
 void URL_GET (String utvonal);
+

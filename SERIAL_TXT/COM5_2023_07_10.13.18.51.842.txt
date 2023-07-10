@@ -1,0 +1,73 @@
+13:18:52:646 -> 
+13:18:52:646 -> *************** PROJECT INFO ****************
+13:18:52:649 ->      project:
+13:18:52:652 ->      8266_full_alap
+13:18:52:652 -> 
+13:18:52:652 ->      fordítás időpontja:
+13:18:52:654 ->      2023-Jul-10  13:17:00
+13:18:52:657 -> 
+13:18:52:657 ->      Alaplap (fordítóban beállított): 
+13:18:52:660 ->      PLATFORMIO_D1_MINI
+13:18:52:665 -> *********************************************
+13:18:52:669 -> 
+13:18:52:669 -> Nincs érzékelve Double-Reset
+13:18:53:117 -> Current counter value: 199
+13:18:53:117 -> allrun_perc_int value: 7295
+13:18:53:138 -> S_DEBUG  value       : 1
+13:18:53:138 -> make_log value       : 0
+13:18:53:138 -> blue_led value       : 1
+13:18:53:421 -> Connecting ...
+13:18:53:421 -> - initWiFi(), ssid: *****WiFi
+13:18:53:425 -> - initWiFi(), pass: *********
+13:18:53:437 -> - initWiFi(), mode: 1
+13:18:54:026 -> ...............
+13:19:01:752 -> 
+13:19:01:752 -> 
+13:19:01:752 ->  * * * WiFi connected:	*****WiFi
+13:19:01:754 ->  * * * WiFi local IP :	192.168.0.96
+13:19:01:757 -> Setup / if (initWiFi())= TRUE (1), ===> Client mód!
+13:19:01:762 -> mDNS responder: OK
+13:19:01:762 -> mDNS url      :  http://8266_full_alap.local
+13:19:01:768 -> LittleFS fájlrendszer elindítva!
+13:19:01:771 ->  * * * FTP username:	esp8266
+13:19:01:773 ->  * * * FTP password:	****
+13:19:01:776 -> 
+13:19:01:776 ->  * * * * * SETUP VÉGE * * * * 
+13:19:01:779 -> 
+13:19:01:779 -> 
+13:19:01:779 -> SERIAL vonalon, az információk megjelennek.
+13:19:01:782 -> ----- ********** -----
+13:19:01:785 -> 
+13:19:01:785 -> WiFi OK!
+13:19:01:785 -> Connected  : *****WiFi
+13:19:01:787 -> WiFi RSSI  : -66
+13:19:01:790 -> Local-IP   : 192.168.0.96
+13:19:01:794 -> TCP-PORT   : 80
+13:19:01:794 -> Hostname   : 8266_full_alap
+13:19:01:798 -> WiFi MAC   : A4:CF:12:F5:08:42
+13:19:01:799 -> WiFi status: WL_CONNECTED
+13:19:01:805 -> gateway-IP : 192.168.0.35
+13:19:01:805 -> wifi-Mode  : WIFI_STA
+13:19:01:805 -> SleepMode  : 2
+13:19:01:808 -> AutoConnect: 1
+13:19:01:808 -> 
+13:19:01:844 -> 
+13:19:01:844 -> NTP_time_is_set()
+13:19:01:844 -> NTP szerver 1.: 0.europe.pool.ntp.org
+13:19:01:847 -> NTP szerver 2.: time.nis.gov
+13:19:01:850 -> NTP_LASTSYNC_STRING: 
+13:19:01:853 -> **** NTP sync. end *****
+13:19:02:145 -> 13. NTP sync +  300ms késleltetéssel
+13:19:08:785 -> WebSocket client #1 connected from 192.168.0.70
+13:19:08:788 -> switch (type) --> WS_EVT_DATA: 4
+13:19:08:790 -> WS_EVT_DATA, len: 10
+13:19:08:793 -> W_S_rec_str (str_all): Hello (WS)
+13:19:08:796 -> W_S_rec_int (str_0-2): 0
+13:19:08:798 -> W_S_rec_str (str_2.-): llo (WS)
+13:19:11:357 -> WebSocket client #1 disconnected
+13:19:11:481 -> WebSocket client #2 connected from 192.168.0.70
+13:19:11:484 -> switch (type) --> WS_EVT_DATA: 4
+13:19:11:487 -> WS_EVT_DATA, len: 10
+13:19:11:489 -> W_S_rec_str (str_all): Hello (WS)
+13:19:11:492 -> W_S_rec_int (str_0-2): 0
+13:19:11:495 -> W_S_rec_str (str_2.-): llo (WS)

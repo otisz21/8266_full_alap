@@ -75,7 +75,7 @@ void setup() {
   Serial.println("Connecting ...");
 // ***** WiFi csatlakozás ***********************************
   if (initWiFi()) Serial.println(F("Setup / if (initWiFi())= TRUE (1), ===> Client mód!"));
-  else Serial.println(F("Setup / if (initWiFi())= FALSE(0), ===> AP mód!"));
+  else            Serial.println(F("Setup / if (initWiFi())= FALSE(0), ===> AP mód!"));
 
     //   Állítsa be az mDNS válaszadót:
     // - Az első argumentum ebben a példában a domain név
@@ -86,8 +86,8 @@ void setup() {
       Serial.println(F("Error setting up MDNS responder!"));
       }
     else{
-    Serial.println(F("mDNS responder started"));
-    Serial.print(F("mDNS name: http://"));
+    Serial.println(F("mDNS responder: OK"));
+    Serial.print(F("mDNS url      :  http://"));
     Serial.print(mdns_name);
     Serial.println(F(".local"));
     MDNS.addService("http", "tcp", 80);
@@ -98,7 +98,7 @@ void setup() {
       ftpSrv.setTransferCallback(_transferCallback);
       filesystem = "LittleFS";
       Serial.println(F("LittleFS fájlrendszer elindítva!"));
-      Serial.print(" * * * FTP username:\t ");
+      Serial.print(" * * * FTP username:\t");
       Serial.println(F("esp8266"));            // username for ftp.
       Serial.print(" * * * FTP password:\t");
       Serial.println(F("8266"));               // password for ftp.
@@ -107,6 +107,7 @@ void setup() {
 
     configTime(MY_TZ, NTP_SERVER_1, NTP_SERVER_2); //Mytz - Budapest
     settimeofday_cb(NTP_time_is_set);              // opcionális: visszahívás, ha elküldték az időt
+
 
 // wifi hálózat, 1->STA mód(client)
   if (WIFI_STA_or_AP == 1) server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
@@ -557,26 +558,26 @@ void loop() {
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 7) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.println(F("Press Button: 7"));
-
+    if (S_DEBUG)Serial.println(F("Press Button: 7"));
+    listDir("/");     // --- Directory listázása Little FS-ből
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 8) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 8"));
-
+    listDir("/serial");     // --- Directory listázása Little FS-ből
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 9) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 9"));
-
+    listDir("/my-app");     // --- Directory listázása Little FS-ből
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 10) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 10"));
-
+    listDir("/serial/New_directory");     // --- Directory listázása Little FS-ből
     WEB_action_b = 0;
     }                            
       
@@ -633,6 +634,5 @@ void loop() {
 // ***** LOOP vége **********************************************************
 
 #include "F_system.h"
-#include "F_SD_filesystem.h"
    
 // END -----    
