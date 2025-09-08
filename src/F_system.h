@@ -98,6 +98,7 @@ bool initWiFi() {
 void WIFI_SCAN() {
   if (S_DEBUG)Serial.println(F("*** WIFI SCAN () ***"));
   WIFI_drb_int = WiFi.scanNetworks(false, false);
+  WIFI_drb_int_all = WIFI_drb_int;
   if (S_DEBUG) {
     if (S_DEBUG)Serial.print(F("Talalt WIFI halozatok szama: "));
     if (S_DEBUG)Serial.println(WIFI_drb_int);
@@ -585,3 +586,152 @@ void WAN_IP_CHECK_easyddns() {
   http.end();
   if (S_DEBUG)Serial.println(payload);
   }
+
+
+  //-------- Push üzenet mobilra  http ------------------------
+  // message : az elküldendő üzenet 
+  // sound   : értesítési hang, pl: bike
+  // priority: -2, -1, 0, 1, 2
+  // device  : 0-minden ezközre, 1-telefonra, 2-laptopra
+String Push_mobil(String message, String sound, String priority, int device) {
+  if (WiFi.status() == WL_CONNECTED) {
+    // Create a JSON object with notification details
+    // Check the API parameters: https://pushover.net/api
+    StaticJsonDocument<512> notification;
+    notification["token"] = apiToken;
+    notification["user"] = userToken;
+    notification["message"] = message;
+
+    if (device == 1) notification["device"] = "Huawei-P20";          // csak a telefonra
+    if (device == 2) notification["device"] = "Laci_HP_desktop";  // csak a laptopra
+    notification["priority"] = priority;     // -2, -1, 0(normal), 1, 2 
+    notification["sound"] = sound;
+    notification["title"] = project;
+
+    
+    String jsonStringNotification;
+    serializeJson(notification, jsonStringNotification);
+    if (S_DEBUG)Serial.println(F("Push jsonStringNotification: "));
+    if (S_DEBUG)Serial.println(jsonStringNotification);
+    WiFiClient client;
+    HTTPClient http;
+    http.begin(client, pushoverApiEndpoint);
+    http.addHeader("Content-Type", "application/json");
+    httpResponseCode = http.POST(jsonStringNotification);
+    http.end();
+    return String(httpResponseCode);
+    }
+  else {
+    return "nincs WIFI (STA)!";
+    }
+  }
+
+
+// ** Callback **  Visszahívás funkció az e-mail küldés állapotának lekéréséhez ******************
+void smtpCallback(SMTP_Status status) {
+  Serial.println(status.info());           // Nyomtassa ki az aktuális állapotot
+  if (status.success()) {
+    // Nyomtassa ki a küldés eredményét
+    // A példákban használt ESP_MAIL_PRINTF formátumnyomtatásra szolgál hibakeresési soros porton keresztül
+    // amely minden támogatott Arduino platform SDK-hoz működik, pl. AVR, SAMD, ESP32 és ESP8266.
+    // Az ESP8266 és ESP32 esetén közvetlenül használhatja a Serial.printf fájlt.
+    Serial.println("----------------");
+    ESP_MAIL_PRINTF("Message sent success: %d\n", status.completedCount());
+    ESP_MAIL_PRINTF("Message sent failed: %d\n", status.failedCount());
+    Serial.println("----------------\n");
+    String eredmeny_OK = String (status.completedCount());
+    String eredmeny_FAILED = String (status.failedCount());
+    email_status = "";
+    email_status += "Message OK: ";
+    email_status += eredmeny_OK;
+    email_status += "  ";
+    email_status += "Message failed: ";
+    email_status += eredmeny_FAILED;
+
+    for (size_t i = 0; i < smtp.sendingResult.size(); i++) {
+      SMTP_Result result = smtp.sendingResult.getItem(i); // Szerezze meg az eredményelemet
+      // ESP32, ESP8266 és SAMD eszköz esetén a result.timestamp fájlból származó időbélyeg érvényes legyen, ha
+      // az eszköz ideje szinkronizálva lett az NTP-kiszolgálóval.
+      // Más eszközök érvénytelen időbélyeget jeleníthetnek meg, mivel az eszköz ideje nincs beállítva, azaz 1970. január 1-jét fogja mutatni.
+      // Az smtp.setSystemTime(xxx) meghívásával manuálisan beállíthatja az eszközidőt. Ahol xxx az időbélyeg (1970. január 1. óta eltelt másodperc)
+      ESP_MAIL_PRINTF("Message No: %d\n", i + 1);
+      ESP_MAIL_PRINTF("Status: %s\n", result.completed ? "success" : "failed");
+      ESP_MAIL_PRINTF("Date/Time: %s\n", MailClient.Time.getDateTimeString(result.timestamp, "%B %d, %Y %H:%M:%S").c_str());
+      ESP_MAIL_PRINTF("Recipient: %s\n", result.recipients.c_str());
+      ESP_MAIL_PRINTF("Subject: %s\n", result.subject.c_str());
+    }
+    Serial.println("----------------\n");
+    smtp.sendingResult.clear(); // Törölnie kell a küldési eredményt, mivel a memóriahasználat növekszik.
+  }
+}
+
+//-------------------------------------------------------------------------------------------
+void SEND_email(String cel_email, String textMsg){
+  MailClient.networkReconnect(true);    // Állítsa be a hálózati újracsatlakozási lehetőséget
+
+  /** Engedélyezze a hibakeresést soros porton keresztül
+   * 0 for no debugging
+   * 1 for basic level debugging
+   *
+   * A hibakeresési port az ESP_MAIL_DEFAULT_DEBUG_PORT keresztül módosítható az ESP_Mail_FS.h fájlban
+   */
+  smtp.debug(1);
+
+  smtp.callback(smtpCallback);    // Állítsa be a visszahívás funkciót, hogy megkapja a küldési eredményeket
+  // Deklarálja a Session_Config paramétert a felhasználó által meghatározott munkamenet hitelesítő adataihoz
+  Session_Config config;
+  /* Állítsa be a munkamenet konfigurációját */
+  config.server.host_name = SMTP_HOST;
+  config.server.port = SMTP_PORT;
+  config.login.email = AUTHOR_EMAIL;
+  config.login.password = AUTHOR_PASSWORD;
+  config.login.user_domain = "";
+
+
+  SMTP_Message message;    // Deklarálja az üzenetosztályt
+  // Állítsa be az üzenet fejléceit
+  // message.sender.name = F("OLED_SH1106");      // Küldő
+  message.sender.name = (project.c_str());      // Küldő
+  message.sender.email = AUTHOR_EMAIL; // Küldő e-mail címe
+  String megj = "ESP8266 E-mail, ";
+  megj += "  ";
+  megj += TIME_STRING;
+  message.subject = (megj);            // üzenet tárgya: szöveg + pontos idő
+  // message.addRecipient(F("ÉN"), RECIPIENT_EMAIL); // címzett neve, és címe
+  message.addRecipient(F("ÉN"), cel_email.c_str()); // címzett neve, és címe
+
+  // HTML üzenet küldése
+  // String htmlMsg = "<div style=\"color:#2f4468;\"><h1>Hello World!</h1>";
+  // htmlMsg +=  "<p>- html-ként formázott üzenet.<br>project: Send_email_ESP8266</p></div>";
+  // message.html.content = htmlMsg.c_str();
+  // message.text.charSet = "us-ascii";
+  // message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
+
+  //Nyers szöveges üzenet küldése
+  //String textMsg = "Hello World! - Ezt az üzenetet az esp bord küldi! :-)";
+  message.text.content = textMsg.c_str();
+  message.text.charSet = "us-ascii";
+  message.text.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
+
+  message.priority = esp_mail_smtp_priority::esp_mail_smtp_priority_low;
+  message.response.notify = esp_mail_smtp_notify_success | esp_mail_smtp_notify_failure | esp_mail_smtp_notify_delay;
+
+  if (!smtp.connect(&config)) {               // Csatlakozzon a szerverhez
+    ESP_MAIL_PRINTF("Connection error, Status Code: %d, Error Code: %d, Reason: %s", smtp.statusCode(), smtp.errorCode(), smtp.errorReason().c_str());
+    return;
+  }
+
+  if (!smtp.isLoggedIn()) {
+    Serial.println("\nNot yet logged in.");
+  }
+  else {
+    if (smtp.isAuthenticated())
+      Serial.println("\nSuccessfully logged in.");
+    else
+      Serial.println("\nConnected with no Auth.");
+  }
+
+  if (!MailClient.sendMail(&smtp, &message))       // Kezdje el az e-mail küldését, és zárja be a munkamenetet
+    ESP_MAIL_PRINTF("Error, Status Code: %d, Error Code: %d, Reason: %s", smtp.statusCode(), smtp.errorCode(), smtp.errorReason().c_str());
+}
+

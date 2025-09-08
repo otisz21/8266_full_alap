@@ -24,6 +24,8 @@ String first_0 (int adat);
 uint64_t millis64();
 String wifi_status_to_string(int w_status);
 String wifi_mode_to_string(int w_mode);
+String Push_mobil(String message, String sound, String priority, int device);
+void SEND_email(String cel_email, String textMsg);
 
 // ****************** F_SD_filesystem.h *********************************
 String readFile(fs::FS &fs, const char *path);

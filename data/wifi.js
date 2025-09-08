@@ -3,13 +3,46 @@ var WIFI_adatok;
 var CONFIG_SSID;
 var data;
 
+/* var json_proba = '{' +
+'"wifi_alap": ['+
+'"WIFI_STA",'+
+'"DIGI-WiFi",'+
+'"192.168.0.106",'+
+'"8266_full_alap",'+
+'80,'+
+'-57,'+
+'"C8:C9:A3:6A:D2:C1",'+
+'"WL_CONNECTED",'+
+'"full_alap_CONFIG"'+
+'],'+
+'"w_scan_db": ['+
+'5,'+
+'5'+
+'],'+
+'"wifi_scan": ['+
+'-56,'+
+'"DIGI-WiFi",'+
+'-60,'+
+'"ASUS",'+
+'-85,'+
+'"ASUS_RPT",'+
+'-92,'+
+'"c685d978",'+
+'-92,'+
+'"Telekom-773af0"'+
+']'+
+'}'; */
+
+document.getElementById("SAVE_BUTTON").style.backgroundColor = "gray";
+
 var xhr = new XMLHttpRequest();
 xhr.open("GET", "/wifi_json", true);
 xhr.send();
 xhr.onreadystatechange = function () {
   if (this.readyState == 4 && this.status == 200) {
     data = JSON.parse(xhr.responseText);
-    //console.log(JSON.stringify(data, null, '\t'));
+    //data = JSON.parse(json_proba);
+    console.log(JSON.stringify(data, null, '\t'));
 
     // -- milyen mód van elmentve, mi látszódjon  ----
     if (data.wifi_alap[0] === "WIFI_STA") {                          // STA mód
@@ -35,92 +68,59 @@ xhr.onreadystatechange = function () {
     document.getElementById("WIFI_7").innerHTML = data.wifi_alap[7];
 
     document.getElementById("AP_SSID").innerHTML = data.wifi_alap[8];
+    document.getElementById("ssid_data").value = data.wifi_alap[9];
+    document.getElementById("pass_data").value = data.wifi_alap[10];    
     JSON_refresh();
   }
 }                
 
-//************************************************************************
-// ----------------------------------------------------
-function JSON_refresh (){               
+// ---------------------------------------------------------------------------
+function JSON_refresh() {
+  for (var i = 1; i < 9; i++) {
+    document.getElementById("_" + i).style.display = "none";
+  }
   document.getElementById("egysem_txt").style.display = "none";
-  document.getElementById("_1").style.display = "none";
-  document.getElementById("_2").style.display = "none";
-  document.getElementById("_3").style.display = "none";
-  document.getElementById("_4").style.display = "none";
-  document.getElementById("_5").style.display = "none";    
-  document.getElementById("_6").style.display = "none";
-  document.getElementById("_7").style.display = "none";
-  document.getElementById("_8").style.display = "none";        
-  document.getElementById("w_db").innerHTML = data.wifi_scan[0];
-  if (data.wifi_scan[0] < 1) {
+  if (data.w_scan_db[1] <= 8) {
+    document.getElementById("w_db").innerHTML = data.w_scan_db[0];
+  }
+  else {
+    document.getElementById("w_db").innerHTML = data.w_scan_db[1] + "/" + data.w_scan_db[0];
+  }
+
+  if (data.w_scan_db[0] < 1) {
     document.getElementById("egysem_txt").style.display = "block";
   }
   else {
-    for (var i = 1; i < data.wifi_scan[0]+1; i++) {
+    var R_data = 0;
+    var S_data = 1;
+    for (var i = 1; i < data.w_scan_db[0] + 1; i++) {
       document.getElementById("_" + i).style.display = "block";
+      document.getElementById("R_" + i).innerHTML = data.wifi_scan[R_data];
+      document.getElementById("S_" + i).innerHTML = data.wifi_scan[S_data];
+      R_data = R_data + 2;
+      S_data = S_data + 2;
     }
-  }
+  }    
+}   
   
-  document.getElementById("R_1").innerHTML = data.wifi_scan[1];
-  document.getElementById("S_1").innerHTML = data.wifi_scan[2];   
-  document.getElementById("R_2").innerHTML = data.wifi_scan[3];
-  document.getElementById("S_2").innerHTML = data.wifi_scan[4];
-  document.getElementById("R_3").innerHTML = data.wifi_scan[5];
-  document.getElementById("S_3").innerHTML = data.wifi_scan[6];   
-  document.getElementById("R_4").innerHTML = data.wifi_scan[7];
-  document.getElementById("S_4").innerHTML = data.wifi_scan[8];
-  document.getElementById("R_5").innerHTML = data.wifi_scan[9];
-  document.getElementById("S_5").innerHTML = data.wifi_scan[10];
-  document.getElementById("R_6").innerHTML = data.wifi_scan[11];
-  document.getElementById("S_6").innerHTML = data.wifi_scan[12];
-  document.getElementById("R_7").innerHTML = data.wifi_scan[13];
-  document.getElementById("S_7").innerHTML = data.wifi_scan[14];
-  document.getElementById("R_8").innerHTML = data.wifi_scan[15];
-  document.getElementById("S_8").innerHTML = data.wifi_scan[16];        
-  }   
-  
+//-----------------------------------------------------------------------------
+function PW_visible() {
+  pass_data.setAttribute("type", "text");
+  setTimeout(PW_hidden, 1500);
+}
+
+//-----------------------------------------------------------------------------
+function PW_hidden() {
+  pass_data.setAttribute("type", "password");
+}
+
   //----------------------------------------------------------------------------- 
-  function SSID_1_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_1").innerHTML;
+  function SSID_TXT(ez) {
+    document.getElementById("ssid_data").value = document.getElementById("S_"+ez).innerHTML;
     document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
   }
-  //----------------------------------------------------------------------------- 
-  function SSID_2_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_2").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_3_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_3").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_4_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_4").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_5_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_5").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_6_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_6").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_7_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_7").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  function SSID_8_TXT() {
-    document.getElementById("ssid_data").value = document.getElementById("S_8").innerHTML;
-    document.getElementById("SAVE_BUTTON").style.backgroundColor = "red";
-  }
-  //----------------------------------------------------------------------------- 
-  
+
+//----------------------------------------------------------------------------- 
 function no_wifi() {
   if (document.getElementById("NO_WIFI").checked == true) {
     document.getElementById("WIFI_VAN").style.display = "none";
@@ -160,7 +160,10 @@ function valtozas_ssid() {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "/wifi_rescan", true);
   xhr.send();
-  document.getElementById("S_1").innerHTML = "WAIT!";
+  for (var i = 1; i < 9; i++) {
+    document.getElementById("_" + i).style.display = "none";
+  }  
+  //document.getElementById("S_1").innerHTML = "WAIT!";
   document.getElementById("w_db").innerHTML = "WAIT!";
   document.getElementById("rescan_B").style.backgroundColor = "yellow";
   document.getElementById("rescan_B").value = "WAIT!";} 

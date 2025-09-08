@@ -45,6 +45,107 @@
 
 <!-- ---------------------------------------------------------------------------- -->
 
+<p><b>Gombok, próbákhoz.</b></p>  
+
+
+<form action="javascript: save_pr();"> 
+
+
+    <p style="text-align: left; margin-left: 10px;"><label class="label_text">Pushover üzenet (STR_1):</label>
+        <input type="text" oninput="valtozas_pr ()" id="STR_1" />
+    </p>
+    
+    <p style="text-align: left; margin-left: 10px;"><label class="label_text">Pushover sound (STR_2):</label>
+        <select type="text" oninput="valtozas_pr ()" id="STR_2" >
+        <option value="pushover">pushover</option>
+        <option value="bike">bike</option>
+        <option value="bugle">bugle</option>
+        <option value="classical">classical</option>
+        <option value="cosmic">cosmic</option>
+        <option value="falling">falling</option>
+        <option value="incoming">incoming</option>
+        <option value="magic">magic</option>                        
+        <option value="pianobar">pianobar</option>
+        <option value="siren">siren</option>
+        <option selected value="tugboat">tugboat</option>
+        <option value="alien">alien</option>
+        <option value="persistent">persistent</option>
+        <option value="echo">echo</option>
+        <option value="updown">updown</option>                        
+        <option value="vibrate">Csak rezgés</option>
+        <option value="none">none</option> 
+        <option value="MALEV">Malév szignál</option>
+    </select>       
+    </p>
+    
+
+    <h2 style="text-align: right; margin-right: 40px; margin-top: -6px;">
+        küldés erre:    
+        <select type="number" id="DEVICE" value="2" oninput="valtozas_pr ()">
+          <option selected value="1">Huawei-P20</option>
+          <option value="2">Laci_HP_desktop</option>
+          <option value="0">minden eszköz</option> 
+        </select>
+    </h2> 
+    
+    <h2 style="text-align: right; margin-right: 40px; margin-top: 14px; margin-bottom: 28px;">
+        prioritás:    
+        <select type="number" id="PRIOR" oninput="valtozas_pr ()">
+          <option value="-2">-2</option>
+          <option value="-1">-1</option>
+          <option selected value="0"> 0</option>
+          <option value="1">+1</option> 
+          <option value="2">+2</option>   
+        </select>
+    </h2> 
+        
+    <p style="text-align: left; margin-left: 10px;"><label class="label_text">E-mail címzett (STR_3):</label>
+        <input type="text" oninput="valtozas_pr ()" id="STR_3" />
+    </p>
+    
+    <p style="text-align: left; margin-left: 10px;"><label class="label_text">E-mail üzenet (STR_4):</label>
+        <input type="text" oninput="valtozas_pr ()" id="STR_4" />
+    </p>
+
+    <button type="submit" id="GOMB_SEND_PR" 
+            class='myButton myB_start'>SAVE</button></form>
+
+
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_1" onclick="BUTTON (1);" >1.<br>send<br>PUSH</button>
+    <button class="button_P"
+     id="B_2" onclick="BUTTON (2);" >2.<br>send<br>e-mail</button>
+</p>
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_3" onclick="BUTTON (3);" >3.<br>WS send:<br>1280</button>
+    <button class="button_P"
+     id="B_4" onclick="BUTTON (4);" >4.<br>WS send:<br>"Hello"</button>
+</p>
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_5" onclick="BUTTON (5);" >5.<br>buzzer<br>melody_1</button>
+    <button class="button_P"
+     id="B_6" onclick="BUTTON (6);" >6.<br>buzzer<br>melody</button>
+</p>
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_7" onclick="BUTTON (7);" >7.<br>buzzer<br>beep</button>
+    <button class="button_P"
+     id="B_8" onclick="BUTTON (8);" >8.<br>buzzer<br>beep - beep</button>
+</p>
+<p style="margin-top:10px;">
+    <button class="button_P"
+     id="B_9" onclick="BUTTON (9);" >9.<br>LittleFS<br>listDir ("/my-app")</button>
+    <button class="button_P"
+     id="B_10" onclick="BUTTON (10);" >10.<br>LittleFS<br>listDir ("/serial/New..")</button>
+</p>
+
+<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:10px;">  
+
+
+
 <h2 style="padding-top:2px; font-weight: normal;"><u>ESP PlatformIO project:</u></h2>
 <h2> <span id='J_SV'>project name</span></h2>
 
@@ -94,44 +195,10 @@
 <hr style="height:1px; background-color:black; margin-top:4px; margin-bottom:6px; width:85%">
  
 <button id="GOMB_SEND" class='myButton myB_start' 
-        style="width:60%;" onclick="save();" >SAVE</button>
+        onclick="save();" >SAVE</button>
      
 <hr style="height:1px; background-color:black; margin-top:6px; margin-bottom:2px;"> 
-<h3> >>> OTT <<< </h3>
- 
-<p><b>Gombok, próbákhoz.</b></p>    
-<p style="margin-top:10px;">
-    <button class="button_P"
-     id="B_1" onclick="BUTTON (1);" >1.<br>WS send:<br>num: 10</button>
-    <button class="button_P"
-     id="B_2" onclick="BUTTON (2);" >2.<br>WS send:<br>String: "10"</button>
-</p>
-<p style="margin-top:10px;">
-    <button class="button_P"
-     id="B_3" onclick="BUTTON (3);" >3.<br>WS send:<br>1280</button>
-    <button class="button_P"
-     id="B_4" onclick="BUTTON (4);" >4.<br>WS send:<br>"Hello"</button>
-</p>
-<p style="margin-top:10px;">
-    <button class="button_P"
-     id="B_5" onclick="BUTTON (5);" >5.<br>readFile-LittleFS<br>serial.txt</button>
-    <button class="button_P"
-     id="B_6" onclick="BUTTON (6);" >6.<br>- - - -<br>- - - -</button>
-</p>
-<p style="margin-top:10px;">
-    <button class="button_P"
-     id="B_7" onclick="BUTTON (7);" >7.<br>LittleFS<br>listDir ("/")</button>
-    <button class="button_P"
-     id="B_8" onclick="BUTTON (8);" >8.<br>LittleFS<br>listDir ("/serial")</button>
-</p>
-<p style="margin-top:10px;">
-    <button class="button_P"
-     id="B_9" onclick="BUTTON (9);" >9.<br>LittleFS<br>listDir ("/my-app")</button>
-    <button class="button_P"
-     id="B_10" onclick="BUTTON (10);" >10.<br>LittleFS<br>listDir ("/serial/New..")</button>
-</p>
-
-<hr style="height:1px; background-color:black; margin-top:8px; margin-bottom:10px;">             
+<h3> >>> OTT <<< </h3>           
     
 <script src="setup.js"></script>
 </body>

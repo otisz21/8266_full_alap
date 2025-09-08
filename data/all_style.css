@@ -124,7 +124,9 @@ body {
     font-weight: bold;
     padding: 2px 2px;
 }
-
+.myB_start{
+    width: 60%;
+}
 .myButton:hover {
     background: linear-gradient(to bottom, #ffab23 55, #ffec64 100);
     background-color: #ffab23;
@@ -175,22 +177,60 @@ body {
     top:5px;} 
 
 /* --- INPUT --- */
-input[type=text] {
-    width: 180px;
-    background-color: lightgeen;
-    border: 1px solid green;
-    border-radius: 2px;
-    padding: 5px 16px;
-    margin: 2px;
-    display: inline-block;
-}
-
 input[type="checkbox"] {
     margin-left: 4px;
     margin-right: 4px;
     width: 24px;
     height: 24px;
     vertical-align: middle;
+}
+
+input[type=text] {
+    width: 240px;
+    background-color: lightgeen;
+    border: 1px solid green;
+    font-size: 1.0rem;
+    font-weight: bold;    
+    border-radius: 2px;
+    padding: 4px 12px;
+    margin: 2px;
+    display: inline-block;
+}
+
+input[type=password] {
+    width: 240px;
+    background-color: lightgeen;
+    border: 1px solid green;
+    font-size: 1.0rem;
+    font-weight: bold;    
+    border-radius: 2px;
+    padding: 4px 12px;
+    margin: 2px;
+    display: inline-block;
+}
+
+select[type=number] {
+    width: 180px;
+    background-color: lightgeen;
+    border: 1px solid green;
+    padding: 2px 2px;
+    margin: 8px;
+    display: inline-block;
+    font-size: 1.0rem;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+select[type=text] {
+    width: 260px;
+    background-color: lightgeen;
+    border: 1px solid green;
+    padding: 4px 6px;
+    margin: 2px;
+    display: inline-block;
+    font-size: 1.0rem;
+    font-weight: bold;
+    border-radius: 2px;
 }
 
 /* --- label ---------------------------*/
@@ -227,21 +267,24 @@ textarea {
 }
 
 .label_min_max_cim {
+    font-family:Arial;
+    font-weight:bold;  
+    font-size:14px;
     margin-top:10px;
     display: block;
-    font-size:16px;
     margin-bottom:8px;
     }
 
 .label_T_D {
-    width: 100%;
-    height: 28px;
-    background-color: #01035a;
-    color: white;
-    text-align: left;
-    font-weight: bold;
-    font-size: 24px;
-    display: inline-block;
+  width: 100%;
+  height: 28px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-color: #01035a;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+  font-size: 22px;
+  display: inline-block;
 }
 
 .select_text_EE {

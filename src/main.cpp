@@ -1,4 +1,10 @@
 
+// 8266_full_alap
+
+// 2023-08-08: + Pushover próba
+
+// 8MB lash (platformio.ini)
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
@@ -13,11 +19,15 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <time.h>             // time() ctime()
-#include <coredecls.h>        // settimeofday_cb() visszahívás ellenőrzéshez (NTP lekérdezés)     
+#include <coredecls.h>        // settimeofday_cb() visszahívás ellenőrzéshez (NTP lekérdezés)  
 
+#include <ESP_Mail_Client.h>
+
+#include "pitches.h"
 #include "variable.h"          // saját külön fájl a változóknak 
 #include "NOfile.h"            // HTML oldal ismeretlen kéréshez
 #include "decleration.h"
+
 
 #include "Led.h"   // próba könyvtár
 #define LED_PIN 2  // Use the built-in LED
@@ -32,13 +42,22 @@ FtpServer ftpSrv;   // set #define FTP_DEBUG in ESP8266FtpServer.h to see ...
 AsyncWebServer server(TCP_PORT);       // TCP portszám: 80 (alap)
 AsyncWebSocket ws("/ws");
 
-ADC_MODE(ADC_VCC);
+SMTPSession smtp;  // Deklarálja a globális használt SMTPSession objektumot az SMTP szállításhoz
+
+//ADC_MODE(ADC_VCC);
       
 // * SETUP ************************************************************** 
 void setup() {                  
   Serial.begin(115200);
-  delay(10);
-  pref.begin("my-app", false);
+  // Serial.begin(9600);
+  delay(3000);
+
+  Serial.println();
+  Serial.println(F("---- SYSTEM START ----"));
+  Serial.println();
+
+  pinMode(buzzerPin, OUTPUT);
+  pref.begin("my-app", false);   // namespace, nem csak olvasás
 
   //drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-drd-
   drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
@@ -129,7 +148,7 @@ void setup() {
   //**** Info + Setup oldal ********************************************************
   server.on("/setup_json", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("application/json");
-    DynamicJsonDocument adatok(384);
+    DynamicJsonDocument adatok(512);
     JsonArray setup = adatok.createNestedArray("setup");
     setup.add(project);                    // [0] project (a file name, csak main.cpp!)
     setup.add(comp_idopont);               // [1] fordítás időpontja
@@ -139,6 +158,14 @@ void setup() {
     setup.add(make_log);                   // [5] hogy legyen soros monitor ellenőrzés
     setup.add(S_DEBUG);                    // [6] készítsen-e log fájlt
     setup.add(blue_led);                   // [7] villogjon-e a beépített kék led
+
+    setup.add(str_pr_1);                   // [8] 
+    setup.add(str_pr_2);                   // [9] 
+    setup.add(str_pr_3);                   // [10] 
+    setup.add(str_pr_4);                   // [11]
+    setup.add(prior);                      // [12]
+    setup.add(device);                     // [13] 
+
     serializeJson(adatok, *response);
     request->send(response);});
 //--------------------------------------------------------------------------------
@@ -153,11 +180,29 @@ void setup() {
     pref.end();
     request->send_P(200, "text/plain", "setup_SAVE_OK");});
 
+//--------------------------------------------------------------------------------
+  server.on("/setup_save_pr", HTTP_GET, [](AsyncWebServerRequest* request) {        // proba stringek             
+    str_pr_1 = (request->getParam("str_1")->value());
+    str_pr_2 = (request->getParam("str_2")->value());
+    str_pr_3 = (request->getParam("str_3")->value());
+    str_pr_4 = (request->getParam("str_4")->value());
+    prior = (request->getParam("prior")->value());
+    device = (request->getParam("device")->value()).toInt();
+    
+    Serial.printf("str_pr_1 value: %s\n", str_pr_1.c_str());
+    Serial.printf("str_pr_2 value: %s\n", str_pr_2.c_str());
+    Serial.printf("str_pr_3 value: %s\n", str_pr_3.c_str());
+    Serial.printf("str_pr_4 value: %s\n", str_pr_4.c_str());    
+    Serial.printf("prior    value: %s\n", prior.c_str());
+    Serial.printf("device   value: %u\n", device);
+
+    request->send_P(200, "text/plain", "setup_SAVE_OK");});
+
 //**** WIFI setup oldal **********************************************************
 //--------------------------------------------------------------------------------
   server.on("/wifi_json", HTTP_GET, [](AsyncWebServerRequest* request) {           // WIFI-Setup oldal JSON adatok küldése
     AsyncResponseStream* response = request->beginResponseStream("application/json");
-    DynamicJsonDocument WIFI_json(512);
+    DynamicJsonDocument WIFI_json(768);
 
     JsonArray wifi_alap = WIFI_json.createNestedArray("wifi_alap");
     wifi_alap.add(wifi_mode_to_string(WiFi.getMode()));  // [0] 
@@ -175,12 +220,20 @@ void setup() {
     wifi_alap.add(WiFi.macAddress());                    // [6]
     wifi_alap.add(wifi_status_to_string(WiFi.status())); // [7]
     wifi_alap.add(AP_ssid);                              // [8]
+    wifi_alap.add(ssid);                                 // [9] elmentett SSID
+    wifi_alap.add(pass);                                 // [10] elmentett PASWORD    
+
+    JsonArray w_scan_db = WIFI_json.createNestedArray("w_scan_db");
+    w_scan_db.add(WIFI_drb_int);                         // [0] talált wifi db.
+    w_scan_db.add(WIFI_drb_int_all);                     // [1] talált wifi db.
 
     JsonArray wifi_scan = WIFI_json.createNestedArray("wifi_scan");
-    wifi_scan.add(WIFI_drb_int);                            // [0] talált wifi db.
+    //wifi_scan.add(WIFI_drb_int);                         // [0] talált wifi db.
     for (int i = 0; i < WIFI_drb_int; i++) {
-      wifi_scan.add(RSSI_sort_int[i]);                      // [1]-[3]-[5]...stb.
-      wifi_scan.add(SSID_sort_string[i]);                   // [2]-[4]-[6]...stb.
+      // wifi_scan.add(RSSI_sort_int[i]);                   // [1]-[3]-[5]...stb.
+      // wifi_scan.add(SSID_sort_string[i]);                // [2]-[4]-[6]...stb.
+      wifi_scan.add(RSSI_sort_int[i]);                   // [0]-[2]-[4]...stb.
+      wifi_scan.add(SSID_sort_string[i]);                // [1]-[3]-[5]...stb.      
       }
 
     serializeJson(WIFI_json, *response);
@@ -448,19 +501,48 @@ void loop() {
   if (time(&now) != prevTime) {    // ha az idő megváltozott, mp-enként
     showTime();                    // showTime időadatok
     if (blue_led == 1) {           // LED villogtatás
-      if(WiFi.status() != WL_CONNECTED){  // nincs WiFi -gyors
+      if (WiFi.status() != WL_CONNECTED) {  // nincs WiFi -gyors
         led_blink_time_ul = 200;
-      }            
+        }
       else {                              // van WiFi - lassú
         led_blink_time_ul = 1000;
-      }
+        }
       }
     if (proc_restart == 10) {
       proc_restart = 0;
       ws.textAll("03");
       }
+
+/*    // ********* nedvesség érz. *******************************************
+    soilMoistureValue = analogRead(SensorPin);  //put Sensor insert into soil
+    //Serial.print("Analog read value: "); Serial.println(soilMoistureValue);
+    soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
+    //Serial.print("soilmoisturepercent: "); Serial.println(soilmoisturepercent);
+    if (soilmoisturepercent > 75) {
+      water_on = 1;
+      Serial.println("> 75 %");
+      }
+    else if (soilmoisturepercent <= 75) {
+      water_off = 0;
+      water_on = 0;
+      //Serial.println("<= 75 %");
+      }
+    else if (soilmoisturepercent >= 0 && soilmoisturepercent <= 100) {
+      //Serial.print(soilmoisturepercent);
+      //Serial.println("%");
+      }
+    */
+
     prevTime = time_t(now);
     }
+
+  if ((water_on == 1) & (water_off == 0)) {
+    WEB_action_b = 15;
+    WEB_delay_ul = millis();
+    water_off = 10;
+    water_on = 0;
+    }
+
 
   if ((blue_led == 1) & (millis() - led_delay_ul > led_blink_time_ul)) {
     led_state = !led_state;             // LED villogtatás
@@ -527,11 +609,14 @@ void loop() {
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 1) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 1"));
+    Serial.print("Push_mobil válasz: ");
+    Serial.println(Push_mobil(str_pr_1, str_pr_2, prior, device));    
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 2) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 2"));
+    SEND_email(str_pr_3, str_pr_4);
     WEB_action_b = 0;
     }
   // --- Setup oldalon gombok 1-10 ---------------
@@ -546,26 +631,57 @@ void loop() {
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 5) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.println(F("Press Button: 5"));
-    Serial.println(readFile(LittleFS, "/serial/incomming_serial.txt"));
+    if (S_DEBUG)Serial.println(F("Press Button: 5"));
+    //Serial.println(readFile(LittleFS, "/serial/incomming_serial.txt"));
+    // hangok száma
+    int size_1 = sizeof(noteDurations_1) / sizeof(int);
+    Serial.print("melody size: "); Serial.println(size_1);
+    // ismételje át a dallam hangjait:
+    for (int thisNote_1 = 0; thisNote_1 < size_1; thisNote_1++) {
+    // A hangjegy időtartamának kiszámításához vegyen egy másodpercet osztva a hangjegy típusával.
+    // például. negyed hang = 1000 / 4, nyolcad hang = 1000/8 stb.      
+      int noteDuration_1 = 1000 / noteDurations_1[thisNote_1];
+      tone(buzzerPin, melody_1[thisNote_1], noteDuration_1);
+    // a hangjegyek megkülönböztetéséhez állítson be egy minimális időt közöttük.
+    // a jegyzet időtartama + 30% jól működik:      
+      int pauseBetweenNotes_1 = noteDuration_1 * 1.30;
+      delay(pauseBetweenNotes_1);
+    // a hangszín lejátszásának leállítása:      
+      noTone(buzzerPin);
+      }
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 6) & (millis() - WEB_delay_ul > 200)) {
-    if(S_DEBUG)Serial.println(F("Press Button: 6"));
-
+    if (S_DEBUG)Serial.println(F("Press Button: 6"));
+    int size = sizeof(noteDurations) / sizeof(int);
+    Serial.print("melody size: "); Serial.println(size);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+      int noteDuration = 1000 / noteDurations[thisNote];
+      tone(buzzerPin, melody[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      noTone(buzzerPin);
+      }
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 7) & (millis() - WEB_delay_ul > 200)) {
     if (S_DEBUG)Serial.println(F("Press Button: 7"));
-    listDir("/");     // --- Directory listázása Little FS-ből
+    tone(buzzerPin, NOTE_C7, 100);
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
   if ((WEB_action_b == 8) & (millis() - WEB_delay_ul > 200)) {
     if(S_DEBUG)Serial.println(F("Press Button: 8"));
-    listDir("/serial");     // --- Directory listázása Little FS-ből
+    int size = sizeof(beep_2x_durations) / sizeof(int);
+    Serial.print("melody size: "); Serial.println(size);
+    for (int i = 0; i < size; i++) {
+      int noteDuration = 1000 / noteDurations[i];
+      tone(buzzerPin, beep_2x[i], noteDuration);
+      delay(noteDuration);
+      noTone(buzzerPin);
+      }
     WEB_action_b = 0;
     }
 // --- Setup oldalon gombok 1-10 ---------------
@@ -597,11 +713,17 @@ void loop() {
     if (S_DEBUG)Serial.println(F("- - WIFI RESCAN! - -"));
     WIFI_SCAN();
     DynamicJsonDocument adatok(512);
+    JsonArray w_scan_db = adatok.createNestedArray("w_scan_db");
+    w_scan_db.add(WIFI_drb_int);                         // [0] talált wifi db.
+    w_scan_db.add(WIFI_drb_int_all);                     // [1] talált wifi db.
+
     JsonArray wifi_scan = adatok.createNestedArray("wifi_scan");
-    wifi_scan.add(WIFI_drb_int);                            // [0] talált wifi db.
+    //wifi_scan.add(WIFI_drb_int);                         // [0] talált wifi db.
     for (int i = 0; i < WIFI_drb_int; i++) {
-      wifi_scan.add(RSSI_sort_int[i]);                      // [1]-[3]-[5]...stb.
-      wifi_scan.add(SSID_sort_string[i]);                   // [2]-[4]-[6]...stb.
+      // wifi_scan.add(RSSI_sort_int[i]);                   // [1]-[3]-[5]...stb.
+      // wifi_scan.add(SSID_sort_string[i]);                // [2]-[4]-[6]...stb.
+      wifi_scan.add(RSSI_sort_int[i]);                   // [0]-[2]-[4]...stb.
+      wifi_scan.add(SSID_sort_string[i]);                // [1]-[3]-[5]...stb.      
       }
     String buf;
     serializeJson(adatok, buf);
@@ -625,9 +747,11 @@ void loop() {
       WEB_action_b = 0;}
 
 // --- 15  -->  -------
-  if ((WEB_action_b == 15)&(millis()-WEB_delay_ul > 300)){ 
-
-      WEB_action_b = 0;}
+  if ((WEB_action_b == 15) & (millis() - WEB_delay_ul > 300)) {
+    Serial.print("Push_mobil válasz: ");
+    Serial.println(Push_mobil("VÍZ!!!", "tugboat", "1", 1));
+    WEB_action_b = 0;
+    }
       
 // ********************************************************************************************************        
     } // LOOP vége

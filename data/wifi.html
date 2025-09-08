@@ -109,7 +109,7 @@
 
 <div id="WIFI_VAN">
 
-    <div class="hyp" onclick="SSID_1_TXT ();">&nbsp
+    <div class="hyp" >&nbsp
       <div class="first">talált Wi-Fi:</div>
       <div class="second"><span id='w_db'></span> db</div>
     </div>
@@ -117,7 +117,7 @@
 <hr style="height:1px; background-color:black; margin-top:6px; 
            width:60%; margin-bottom:2px;"/>
            
-  <div class="hyp_w_scan" onclick="SSID_1_TXT ();">&nbsp
+  <div class="hyp_w_scan">&nbsp
     <div class="first_w_scan" style="font-size:14px;">jelerősség (dBm) - </div>
     <div class="second_w_scan" style="font-size:14px;">SSID (Wi-Fi hálózat)</div>
   </div>
@@ -127,42 +127,42 @@
  
  <label class="label_1" id="egysem_txt"  style="color:red; margin-bottom: 10px;">Nem található egy Wi-Fi hálózat sem!</label>
  
-  <div class="hyp_w_scan" id="_1" onclick="SSID_1_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_1" onclick="SSID_TXT (1);">&nbsp
     <div class="first_w_scan">1.&nbsp&nbsp<span id='R_1'>RSSI-1</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_1'>SSID-1</span></u></div>
   </div>
 
-  <div class="hyp_w_scan" id="_2" onclick="SSID_2_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_2" onclick="SSID_TXT (2);">&nbsp
     <div class="first_w_scan">2.&nbsp&nbsp<span id='R_2'>RSSI-2</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_2'>SSID-2</span></u></div>
   </div>
   
-  <div class="hyp_w_scan" id="_3" onclick="SSID_3_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_3" onclick="SSID_TXT (3);">&nbsp
     <div class="first_w_scan">3.&nbsp&nbsp<span id='R_3'>RSSI-3</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_3'>SSID-3</span></u></div>
   </div>
 
-  <div class="hyp_w_scan" id="_4" onclick="SSID_4_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_4" onclick="SSID_TXT (4);">&nbsp
     <div class="first_w_scan">4.&nbsp&nbsp<span id='R_4'>RSSI-4</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_4'>SSID-4</span></u></div>
   </div>
 
-  <div class="hyp_w_scan" id="_5" onclick="SSID_5_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_5" onclick="SSID_TXT (5);">&nbsp
     <div class="first_w_scan">5.&nbsp&nbsp<span id='R_5'>RSSI-5</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_5'>SSID-5</span></u></div>
   </div> 
 
-  <div class="hyp_w_scan" id="_6" onclick="SSID_6_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_6" onclick="SSID_TXT (6);">&nbsp
     <div class="first_w_scan">6.&nbsp&nbsp<span id='R_6'>RSSI-6</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_6'>SSID-6</span></u></div>
   </div> 
   
-  <div class="hyp_w_scan" id="_7" onclick="SSID_7_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_7" onclick="SSID_TXT (7);">&nbsp
     <div class="first_w_scan">7.&nbsp&nbsp<span id='R_7'>RSSI-7</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_7'>SSID-7</span></u></div>
   </div> 
 
-  <div class="hyp_w_scan" id="_8" onclick="SSID_8_TXT ();">&nbsp
+  <div class="hyp_w_scan" id="_8" onclick="SSID_TXT (8);">&nbsp
     <div class="first_w_scan">8.&nbsp&nbsp<span id='R_8'>RSSI-8</span> dBm |</div>
     <div class="second_w_scan"><u><span id='S_8'>SSID-8</span></u></div>
   </div>         
@@ -174,12 +174,13 @@
            width:60%; margin-bottom:4px;">
 
     <p style="text-align: right; margin-right: 10px;"><label class="label_text">SSID:</label>
-    <input type="text" oninput="valtozas_ssid()" id="ssid_data" /></p>
+    <input type="text" style="width: 210px;" oninput="valtozas_ssid()" id="ssid_data" /></p>
 
     <p style="text-align: right; margin-right: 10px;"><label class="label_text">Password:</label>
-      <input type="text" oninput="valtozas_ssid()" id="pass_data" /></p>
-
-
+      <input type="password" style="width: 188px;" oninput="valtozas_ssid()" id="pass_data" />
+      <button style="cursor: pointer; height: 24px; background-color: greenyellow; border: 1px solid rgb(0, 0, 0);
+      padding: 4px;" onclick ="PW_visible()">*</button>
+    </p>
 
     <h2 class="label_mdns">
       STA módban, ha van mDNS szolgáltatás, elérhető<br>

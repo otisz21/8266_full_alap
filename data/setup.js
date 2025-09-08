@@ -2,29 +2,37 @@
 var xhr = new XMLHttpRequest();
 xhr.open("GET", "/setup_json", true);
 xhr.send();
-xhr.onreadystatechange = function() {
-  if (this.readyState == 4 && this.status == 200) {                
-    adatok = JSON.parse(xhr.responseText);       
-  //console.log(JSON.stringify(adatok,null,'\t'));      // "szépen" kiírt JSON
-   //------------------------------------------------        
-    document.getElementById("J_SV").innerHTML = adatok.setup [0];
-    document.getElementById("J_ST").innerHTML = adatok.setup[1];       
-    document.getElementById("J_BOARD").innerHTML = adatok.setup [2];        
-    document.getElementById("J_SRUN").innerHTML = msToTime(adatok.setup[3]);        
+xhr.onreadystatechange = function () {
+  if (this.readyState == 4 && this.status == 200) {
+    adatok = JSON.parse(xhr.responseText);
+    //console.log(JSON.stringify(adatok,null,'\t'));      // "szépen" kiírt JSON
+    //------------------------------------------------        
+    document.getElementById("J_SV").innerHTML = adatok.setup[0];
+    document.getElementById("J_ST").innerHTML = adatok.setup[1];
+    document.getElementById("J_BOARD").innerHTML = adatok.setup[2];
+    document.getElementById("J_SRUN").innerHTML = msToTime(adatok.setup[3]);
     document.getElementById("J_SRUN_ALL").innerHTML = percToTime(adatok.setup[4]);
-   //------------------------------------------------
-    if (adatok.setup [5] == 1) document.getElementById("MAKE_LOG").checked = true;
+    //------------------------------------------------
+    if (adatok.setup[5] == 1) document.getElementById("MAKE_LOG").checked = true;
     else document.getElementById("MAKE_LOG").checked = false;
-   //------------------------------------------------        
-    if (adatok.setup [6] == 1) document.getElementById("S_DEBUG").checked = true;
+    //------------------------------------------------        
+    if (adatok.setup[6] == 1) document.getElementById("S_DEBUG").checked = true;
     else document.getElementById("S_DEBUG").checked = false;
-   //------------------------------------------------        
-    if (adatok.setup [7] == 1) document.getElementById("BLUE_LED").checked = true;
+    //------------------------------------------------        
+    if (adatok.setup[7] == 1) document.getElementById("BLUE_LED").checked = true;
     else document.getElementById("BLUE_LED").checked = false;
     //------------------------------------------------
+    document.getElementById("STR_1").value = adatok.setup[8];
+    document.getElementById("STR_2").value = adatok.setup[9];
+    document.getElementById("STR_3").value = adatok.setup[10];
+    document.getElementById("STR_4").value = adatok.setup[11];
+    document.getElementById("PRIOR").value = adatok.setup[12];
+    document.getElementById("DEVICE").value = adatok.setup[13];
+
     document.getElementById("GOMB_SEND").style.backgroundColor = "lightgray";
-    document.getElementById("GOMB_SEND").style.color = "black";        
-      }}     
+    document.getElementById("GOMB_SEND").style.color = "black";
+  }
+}     
 
 //----------------------------------------------------------------------------- 
 function msToTime(ms) {
@@ -61,6 +69,11 @@ function valtozas() {
 }
 
 //----------------------------------------------------------------------------- 
+function valtozas_pr() {
+  document.getElementById("GOMB_SEND_PR").style.backgroundColor = "red";
+  document.getElementById("GOMB_SEND_PR").style.color = "white";
+}
+//----------------------------------------------------------------------------- 
 function save() {
   if (document.getElementById("MAKE_LOG").checked == true) var make_log = 1;
   else var make_log = 0;
@@ -78,16 +91,26 @@ function save() {
   document.getElementById("GOMB_SEND").style.color = "black";
 }       
       
+function save_pr() {
+  var str_1 = document.getElementById("STR_1").value;
+  var str_2 = document.getElementById("STR_2").value;
+  var str_3 = document.getElementById("STR_3").value;
+  var str_4 = document.getElementById("STR_4").value;
+  var device = document.getElementById("DEVICE").value;
+  var prior = document.getElementById("PRIOR").value;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/setup_save_pr?str_1=' + str_1 + '&str_2=' + str_2 + '&str_3=' + str_3
+  + '&str_3=' + str_3 + '&str_4=' + str_4 + '&device=' + device + '&prior=' + prior, true);
+  xhr.send();
+  document.getElementById("GOMB_SEND_PR").style.backgroundColor = "lightgray";
+  document.getElementById("GOMB_SEND_PR").style.color = "black";
+}  
+
 //------------------------------------------ 
 function BUTTON(ez) {
   console.log("Press buttun: ", ez);
-  if (ez == 1) {
-    websocket.send(10);
-  }
-  else if (ez == 2) {
-    websocket.send("10");
-  }
-  else if (ez == 3) {
+  if (ez == 3) {
     websocket.send(1280);
   }
   else if (ez == 4) {
@@ -131,8 +154,8 @@ function onClose(event) {
 function onLoad(event) {
   initWebSocket();
 }
-      //***************************************************
-      //***************************************************
+
+//***************************************************
 function onMessage(event) {
   //console.log("onMessage(event): ", event.data);
   var rec_ID = parseInt(event.data.substring(0, 2));
